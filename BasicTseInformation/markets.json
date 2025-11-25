@@ -1,0 +1,10 @@
+[
+    {
+        "MarketID":1.0,
+        "MarketName":"بورس"
+    },
+    {
+        "MarketID":2.0,
+        "MarketName":"فرابورس"
+    }
+]
