@@ -1,0 +1,98 @@
+[
+    {
+        "SectorID":55.0,
+        "SectorName":"هتل و رستوران"
+    },
+    {
+        "SectorID":72.0,
+        "SectorName":"رایانه و فعالیت های وابسته به آن"
+    },
+    {
+        "SectorID":27.0,
+        "SectorName":"فلزات اساسی"
+    },
+    {
+        "SectorID":13.0,
+        "SectorName":"استخراج کانه های فلزی"
+    },
+    {
+        "SectorID":64.0,
+        "SectorName":"مخابرات"
+    },
+    {
+        "SectorID":53.0,
+        "SectorName":"سیمان، آهک و گچ"
+    },
+    {
+        "SectorID":73.0,
+        "SectorName":"اطلاعات و ارتباطات"
+    },
+    {
+        "SectorID":47.0,
+        "SectorName":"خرده فروشی،باستثنای وسایل نقلیه موتوری"
+    },
+    {
+        "SectorID":67.0,
+        "SectorName":"فعالیتهای کمکی به نهادهای مالی واسط"
+    },
+    {
+        "SectorID":31.0,
+        "SectorName":"ماشین آلات و دستگاه های برقی"
+    },
+    {
+        "SectorID":43.0,
+        "SectorName":"مواد و محصولات دارویی"
+    },
+    {
+        "SectorID":44.0,
+        "SectorName":"محصولات شیمیایی"
+    },
+    {
+        "SectorID":25.0,
+        "SectorName":"لاستیک و پلاستیک"
+    },
+    {
+        "SectorID":56.0,
+        "SectorName":"سرمایه گذاریها"
+    },
+    {
+        "SectorID":70.0,
+        "SectorName":"انبوه سازی، املاک و مستغلات"
+    },
+    {
+        "SectorID":22.0,
+        "SectorName":"انتشار، چاپ و تکثیر"
+    },
+    {
+        "SectorID":28.0,
+        "SectorName":"ساخت محصولات فلزی"
+    },
+    {
+        "SectorID":20.0,
+        "SectorName":"محصولات چوبی"
+    },
+    {
+        "SectorID":21.0,
+        "SectorName":"محصولات کاغذی"
+    },
+    {
+        "SectorID":60.0,
+        "SectorName":"حمل ونقل، انبارداری و ارتباطات"
+    },
+    {
+        "SectorID":11.0,
+        "SectorName":"استخراج نفت گاز و خدمات جنبی جز اکتشاف"
+    },
+    {
+        "SectorID":34.0,
+        "SectorName":"خودرو و ساخت قطعات"
+    },
+    {
+        "SectorID":74.0,
+        "SectorName":"خدمات فنی و مهندسی"
+    },
+    {
+        "SectorID":1.0,
+        "SectorName":"زراعت و خدمات وابسته"
+    }
+]
