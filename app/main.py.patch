@@ -1,0 +1,2 @@
+=======
+        symbols = [row.symbol_en for row in session.query(SymbolList).all()]
