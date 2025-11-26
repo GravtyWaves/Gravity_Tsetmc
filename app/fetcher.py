@@ -50,25 +50,22 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
         try:
             print(f"[{i}/{total_symbols}] Fetching {symbol_fa}...", flush=True)
             df = PriceHistoryManager.get_price_history(symbol_fa, adjust_price=adjust, ignore_date=True)
-            
             if not (isinstance(df, pd.DataFrame) and not df.empty):
                 print(f"  [✗] No data for {symbol_fa}", flush=True)
                 error_count += 1
                 continue
-            
             count = 0
             for idx, row in df.iterrows():
                 date_val = str(idx)
                 if not date_val or pd.isnull(date_val):
                     continue
-                
                 # Normalize row keys (handle Persian/English column names)
                 row_dict = {}
                 for k, v in row.items():
                     k_normalized = str(k).lower().strip().replace(' ', '')
                     row_dict[k_normalized] = v
-                
-                price = SymbolPrice(
+                # Map to SymbolPrice fields
+                price_kwargs = dict(
                     symbol=symbol_en,
                     date=date_val,
                     open=row_dict.get('open'),
@@ -76,19 +73,23 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
                     low=row_dict.get('low'),
                     close=row_dict.get('close'),
                     final=row_dict.get('final'),
+                    last=row_dict.get('last'),
                     volume=row_dict.get('volume'),
                     value=row_dict.get('value'),
-                    no=row_dict.get('no'),
-                    name=row_dict.get('name'),
-                    market=row_dict.get('market')
+                    count=row_dict.get('no'),
+                    adjusted_close=row_dict.get('adjclose'),
+                    gregorian_date=row_dict.get('date'),
                 )
+                # Only pass valid keys
+                price = SymbolPrice(**{k: v for k, v in price_kwargs.items() if k in SymbolPrice.__table__.columns.keys()})
                 session.merge(price)
                 count += 1
-            
             session.commit()
-            print(f"  [✓] Stored {count} records for {symbol_fa}", flush=True)
-            success_count += 1
-            
+            if count > 0:
+                print(f"  [✓] Stored {count} records for {symbol_fa}", flush=True)
+                success_count += 1
+            else:
+                print(f"  [✗] No valid records stored for {symbol_fa}", flush=True)
         except Exception as e:
             print(f"  [✗] Error fetching {symbol_fa}: {e}", flush=True)
             error_count += 1
