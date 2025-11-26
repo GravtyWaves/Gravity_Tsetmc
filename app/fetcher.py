@@ -1,8 +1,8 @@
 
 import logging
 import sys
-from finpy_tse import get_price_history, Get_CWI_History, Get_EWI_History
-import finpy_tse
+from gravity_tse import get_price_history, Get_CWI_History, Get_EWI_History
+import gravity_tse
 
 # تنظیم logging برای نمایش همه لاگ‌ها در کنسول uvicorn
 logging.basicConfig(
@@ -12,10 +12,10 @@ logging.basicConfig(
 )
 
 def _get_sector_webid_map():
-    if hasattr(finpy_tse, 'get_sector_webid_map'):
-        return finpy_tse.get_sector_webid_map()
-    elif hasattr(finpy_tse, 'SECTOR_WEBID_MAP'):
-        return getattr(finpy_tse, 'SECTOR_WEBID_MAP')
+    if hasattr(gravity_tse, 'get_sector_webid_map'):
+        return gravity_tse.get_sector_webid_map()
+    elif hasattr(gravity_tse, 'SECTOR_WEBID_MAP'):
+        return getattr(gravity_tse, 'SECTOR_WEBID_MAP')
     else:
         raise ImportError('Neither get_sector_webid_map nor SECTOR_WEBID_MAP found in finpy_tse')
 from .db import SessionLocal, SymbolPrice, IndexPrice, Index
@@ -32,6 +32,11 @@ def fetch_and_store_symbol_prices(symbols, adjust=False):
     total_symbols = len(symbols)
     print(f"[SymbolPrice] Starting to fetch prices for {total_symbols} symbols...", flush=True)
     for i, (symbol_fa, symbol_en) in enumerate(symbols, 1):
+        # Resume logic: skip symbol if it already has price data
+        exists = session.query(SymbolPrice).filter_by(symbol=symbol_en).first()
+        if exists:
+            print(f"[SymbolPrice] Skipping {symbol_fa} ({symbol_en}) - already in DB.", flush=True)
+            continue
         print(f"[SymbolPrice] Fetching data for symbol {i}/{total_symbols}: {symbol_fa} ({symbol_en})", flush=True)
         df = get_price_history(symbol_fa, adjust_price=adjust, ignore_date=True)
         if not (isinstance(df, pd.DataFrame) and not df.empty):
@@ -77,7 +82,7 @@ def fetch_and_store_index_prices(indices, adjust=False):
     total_indices = len(indices)
     print(f"[IndexPrice] Starting to fetch prices for {total_indices} indices...", flush=True)
     from .db import Index
-    import finpy_tse
+    import gravity_tse
     # WebID mapping for main indices
     MAIN_INDEX_WEBIDS = {
         'شاخص کل': '32097828799138957',
@@ -102,9 +107,9 @@ def fetch_and_store_index_prices(indices, adjust=False):
         try:
             if index_name in MAIN_INDEX_WEBIDS:
                 webid = MAIN_INDEX_WEBIDS[index_name]
-                df = finpy_tse.get_index_price_by_webid(webid, just_adj_close=False)
+                df = gravity_tse.get_index_price_by_webid(webid, just_adj_close=False)
             else:
-                df = finpy_tse.get_index_price_safely(index_name, ignore_date=True, adjust_price=adjust, just_adj_close=False)
+                df = gravity_tse.get_index_price_safely(index_name, ignore_date=True, adjust_price=adjust, just_adj_close=False)
         except Exception as e:
             print(f"[IndexPrice] Error fetching data for index '{index_name}': {e}", flush=True)
             continue
@@ -148,7 +153,7 @@ def fetch_and_store_industry_indices(industries, adjust=False):
     total_industries = len(industries)
     print(f"[IndustryIndex] Starting to fetch indices for {total_industries} industries...", flush=True)
     from .db import Index, IndexPrice
-    from finpy_tse import fetch_index_history
+    from gravity_tse import fetch_index_history
     for i, industry in enumerate(industries, 1):
         print(f"[IndustryIndex] Fetching data for industry {i}/{total_industries}: {industry}", flush=True)
         idx_obj = session.query(Index).filter_by(name=industry, type='sector').first()
