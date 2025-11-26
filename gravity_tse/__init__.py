@@ -2447,7 +2447,36 @@ def Get_ShareHoldersInfo(ticker = 'خودرو'):
     df['date'] = today
     df['symbol'] = ticker
     # ذخیره در دیتابیس
-    session = SessionLocal()
+    # تعریف SessionLocal اگر قبلاً تعریف نشده است
+    try:
+        session = SessionLocal()
+    except NameError:
+        from sqlalchemy.orm import sessionmaker
+        from sqlalchemy import create_engine
+        # لطفاً آدرس دیتابیس خود را جایگزین کنید
+        engine = create_engine('sqlite:///your_database.db')
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        session = SessionLocal()
+    # Define ShareholdersInfo ORM model if not already defined
+    try:
+        ShareholdersInfo
+    except NameError:
+        from sqlalchemy.ext.declarative import declarative_base
+        from sqlalchemy import Column, Integer, String, Float, Date
+
+        Base = declarative_base()
+        class ShareholdersInfo(Base):
+            __tablename__ = "shareholders_info"
+            id = Column(Integer, primary_key=True, autoincrement=True)
+            symbol = Column(String, index=True)
+            date = Column(String)
+            holder_name = Column(String)
+            holder_type = Column(String)
+            shares = Column(Integer)
+            percent = Column(Float)
+            change = Column(Integer)
+            national_id = Column(String)
+
     count = 0
     for _, row in df.iterrows():
         holder = ShareholdersInfo(
