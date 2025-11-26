@@ -1,5 +1,9 @@
-from gravity_tse import Build_Market_StockList, __Get_TSE_Sector_WebID__
+import json
+import pandas as pd
+from gravity_tse import get_sector_webid_map
 from .db import SessionLocal, SymbolList, Index, Market, Panel, Sector
+
+
 def fetch_and_store_market_list():
     session = SessionLocal()
     print("[Market] Loading markets from JSON...", flush=True)
@@ -105,28 +109,47 @@ def fetch_and_store_symbol_list():
         print("[SymbolList] Error: companies.json not found.", flush=True)
         session.close()
         return
+    
     print(f"[SymbolList] Loaded {len(companies)} companies from JSON.", flush=True)
+    
+    # Get default values for missing fields
+    markets = session.query(Market).all()
+    sectors = session.query(Sector).all()
+    
+    default_market_id = markets[0].market_id if markets else 1.0
+    default_sector_id = sectors[0].sector_id if sectors else 1.0
+    
     count = 0
+    skip_count = 0
+    
     for item in companies:
         english_symbol = item.get("Ticker4") or item.get("CompanyCode12")
         persian_symbol = item.get("Ticker")
         if not english_symbol or not persian_symbol:
+            skip_count += 1
             continue  # skip if missing key fields
+        
         count += 1
         if count % 100 == 0:
             print(f"[SymbolList] Processed {count} symbols so far...", flush=True)
+        
+        # Use defaults for missing market_id and sector_id
+        market_id = item.get("MarketID") or default_market_id
+        sector_id = item.get("SectorID") or default_sector_id
+        
         symbol = SymbolList(
             symbol_en=english_symbol,
             symbol_fa=persian_symbol,
             name=item.get("Name"),
-            market_id=item.get("MarketID"),
-            sector_id=item.get("SectorID"),
+            market_id=market_id,
+            sector_id=sector_id,
             panel_id=item.get("PanelID")
         )
         session.merge(symbol)
+    
     session.commit()
     session.close()
-    print(f"[SymbolList] Processed {count} symbols total", flush=True)
+    print(f"[SymbolList] Processed {count} symbols total (skipped {skip_count})", flush=True)
 
 def fetch_and_store_index_list():
 

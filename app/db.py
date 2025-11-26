@@ -4,7 +4,7 @@ Database models and configuration for TSETMC data management.
 Professional and clean database structure for Tehran Stock Exchange data.
 """
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text, Index as SQLIndex
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Text, Index as SQLIndex, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -78,9 +78,9 @@ class SymbolList(Base):
     web_id = Column(String(50), unique=True, nullable=True, index=True)  # شناسه وب TSETMC
     
     # Foreign keys
-    market_id = Column(Float, nullable=False, index=True)
-    sector_id = Column(Float, nullable=False, index=True)
-    panel_id = Column(Float, nullable=True, index=True)
+    market_id = Column(Float, ForeignKey("markets.market_id"), nullable=False, index=True)
+    sector_id = Column(Float, ForeignKey("sectors.sector_id"), nullable=False, index=True)
+    panel_id = Column(Float, ForeignKey("panels.panel_id"), nullable=True, index=True)
     
     # Metadata
     is_active = Column(Integer, default=1, index=True)  # آیا فعال است
@@ -109,7 +109,7 @@ class SymbolPrice(Base):
     """قیمت‌های روزانه نمادها"""
     __tablename__ = "symbol_prices"
     
-    symbol = Column(String(20), primary_key=True, index=True)
+    symbol = Column(String(20), ForeignKey("symbol_list.symbol_en"), primary_key=True, index=True)
     date = Column(String(10), primary_key=True, index=True)  # تاریخ جلالی (YYYY-MM-DD)
     gregorian_date = Column(String(10), index=True, nullable=True)  # تاریخ میلادی
     
@@ -147,7 +147,7 @@ class IndexPrice(Base):
     """قیمت‌های روزانه شاخص‌ها"""
     __tablename__ = "index_prices"
     
-    index_id = Column(Integer, primary_key=True)
+    index_id = Column(Integer, ForeignKey("indices.id"), primary_key=True)
     date = Column(String(10), primary_key=True, index=True)  # تاریخ جلالی
     gregorian_date = Column(String(10), index=True, nullable=True)  # تاریخ میلادی
     
@@ -190,7 +190,7 @@ class Index(Base):
     
     # معریف‌های اضافی
     web_id = Column(String(50), unique=True, nullable=True, index=True)  # شناسه وب TSETMC
-    sector_id = Column(Float, nullable=True, index=True)  # اگر شاخص بخشی است
+    sector_id = Column(Float, ForeignKey("sectors.sector_id"), nullable=True, index=True)  # اگر شاخص بخشی است
     
     # Metadata
     is_active = Column(Integer, default=1, index=True)
@@ -208,7 +208,7 @@ class RIData(Base):
     """داده‌های حقوقی و حقیقی (Retail vs Institutional)"""
     __tablename__ = "ri_data"
     
-    symbol = Column(String(20), primary_key=True, index=True)
+    symbol = Column(String(20), ForeignKey("symbol_list.symbol_en"), primary_key=True, index=True)
     date = Column(String(10), primary_key=True, index=True)  # تاریخ جلالی
     gregorian_date = Column(String(10), index=True, nullable=True)
     
@@ -272,7 +272,7 @@ class ShareholdersInfo(Base):
     __tablename__ = "shareholders_info"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    symbol = Column(String(20), index=True, nullable=False)
+    symbol = Column(String(20), ForeignKey("symbol_list.symbol_en"), index=True, nullable=False)
     date = Column(String(10), index=True, nullable=False)  # تاریخ جلالی
     gregorian_date = Column(String(10), index=True, nullable=True)
     
@@ -330,3 +330,8 @@ def reset_all_tables():
 def get_session():
     """دریافت یک session برای کار با دیتابیس"""
     return SessionLocal()
+
+
+def init_db():
+    """Initialize database and create all tables"""
+    Base.metadata.create_all(bind=engine)
