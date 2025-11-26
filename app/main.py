@@ -1,5 +1,7 @@
 
-from fastapi import FastAPI, Request
+
+from fastapi import FastAPI, Request, Body
+
 
 app = FastAPI()
 
@@ -39,7 +41,6 @@ def update_db(payload: dict = Body(...)):
 
 import logging
 import sys
-from fastapi import Body
 from .usd_fetcher import fetch_and_store_usd_irr_prices
 from .fetcher import fetch_and_store_symbol_prices, fetch_and_store_index_prices, fetch_and_store_industry_indices
 from .list_fetcher import fetch_and_store_symbol_list, fetch_and_store_index_list
