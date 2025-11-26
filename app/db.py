@@ -103,6 +103,22 @@ class Sector(Base):
 
 
 # --- USD/IRR Price Table ---
+
+# --- Shareholders Info Table ---
+class ShareholdersInfo(Base):
+    __tablename__ = "shareholders_info"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    symbol = Column(String, ForeignKey('symbol_list.symbol_en'), index=True)
+    date = Column(String, index=True)  # تاریخ دریافت اطلاعات
+    holder_name = Column(String, index=True)  # نام سهامدار
+    holder_type = Column(String)  # نوع سهامدار (حقیقی/حقوقی)
+    shares = Column(Float)  # تعداد سهام
+    percent = Column(Float)  # درصد مالکیت
+    change = Column(Float)  # تغییرات نسبت به روز قبل
+    national_id = Column(String, nullable=True)  # شناسه ملی (در صورت وجود)
+    # Relationship
+    symbol_obj = relationship('SymbolList', backref='shareholders')
+
 class UsdIrrPrice(Base):
     __tablename__ = "usd_irr_prices"
     date = Column(String, primary_key=True, index=True)
