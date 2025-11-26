@@ -1,4 +1,4 @@
-from finpy_tse import Build_Market_StockList, __Get_TSE_Sector_WebID__
+from gravity_tse import Build_Market_StockList, __Get_TSE_Sector_WebID__
 from .db import SessionLocal, SymbolList, Index, Market, Panel, Sector
 def fetch_and_store_market_list():
     session = SessionLocal()
@@ -46,7 +46,7 @@ def fetch_and_store_panel_list():
 
 def fetch_and_store_sector_list():
     session = SessionLocal()
-    print("[Sector] Loading sectors from JSON...", flush=True)
+    print("[Sector] Loading sectors from JSON and mapping to indices...", flush=True)
     try:
         with open("BasicTseInformation/sectors.json", "r", encoding="utf-8") as f:
             sectors = json.load(f)
@@ -54,17 +54,43 @@ def fetch_and_store_sector_list():
         print("[Sector] Error: sectors.json not found.", flush=True)
         session.close()
         return
+    from gravity_tse import get_sector_webid_map
+    sector_webid_map = get_sector_webid_map()
     count = 0
+    idx_count = 0
     for item in sectors:
-        sector = Sector(
-            sector_id=item.get("SectorID"),
-            sector_name=item.get("SectorName")
-        )
-        session.merge(sector)
+        sector_id = item.get("SectorID")
+        sector_name = item.get("SectorName")
+        # درج یا به‌روزرسانی صنعت
+        sector = session.query(Sector).filter_by(sector_id=sector_id).first()
+        if not sector:
+            sector = Sector(sector_id=sector_id, sector_name=sector_name)
+            session.add(sector)
+        else:
+            sector.sector_name = sector_name
         count += 1
+        # اگر این صنعت web_id دارد، به جدول شاخص‌ها هم اضافه یا آپدیت کن
+        web_id = None
+        for k, v in sector_webid_map.items():
+            if k.strip() == sector_name.strip():
+                web_id = v
+                break
+        if web_id:
+            from .db import Index
+            # اگر شاخصی با همین web_id وجود دارد، فقط آپدیت کن
+            idx = session.query(Index).filter_by(web_id=str(web_id)).first()
+            if not idx:
+                idx = Index(name=sector_name, type='sector', web_id=str(web_id), description=sector_name, sector_id=sector_id)
+                session.add(idx)
+            else:
+                idx.name = sector_name
+                idx.type = 'sector'
+                idx.description = sector_name
+                idx.sector_id = sector_id
+            idx_count += 1
     session.commit()
     session.close()
-    print(f"[Sector] Stored {count} sectors.", flush=True)
+    print(f"[Sector] Stored {count} sectors and {idx_count} sector indices.", flush=True)
 
 import pandas as pd
 import json
@@ -105,7 +131,7 @@ def fetch_and_store_symbol_list():
 def fetch_and_store_index_list():
 
     import json
-    from finpy_tse import get_sector_webid_map
+    from gravity_tse import get_sector_webid_map
     session = SessionLocal()
     print("[Index] Storing all indices (main + sectors) in unified table...", flush=True)
 
@@ -145,28 +171,18 @@ def fetch_and_store_index_list():
         ("شاخص 50 شرکت فعالتر", "Index_50_Active", "46342955726788357", "market")
     ]
     for fa_name, en_name, web_id, typ in main_indices:
-        idx = session.query(Index).filter_by(name=fa_name, type=typ).first()
+        from .db import Index
+        # اگر شاخصی با همین web_id وجود دارد، فقط آپدیت کن
+        idx = session.query(Index).filter_by(web_id=str(web_id)).first()
         if not idx:
-            idx = Index(name=fa_name, type=typ, web_id=web_id, description=en_name)
+            idx = Index(name=fa_name, type=typ, web_id=str(web_id), description=en_name)
             session.add(idx)
         else:
-            idx.web_id = web_id
+            idx.name = fa_name
+            idx.type = typ
             idx.description = en_name
         session.commit()
-
-    # Sector indices (from SECTOR_WEBID_MAP)
-    sector_webid_map = get_sector_webid_map()
-    for fa_sector, web_id in sector_webid_map.items():
-        en_sector = farsi_to_english(fa_sector)
-        idx = session.query(Index).filter_by(name=fa_sector, type='sector').first()
-        if not idx:
-            idx = Index(name=fa_sector, type='sector', web_id=str(web_id), description=en_sector)
-            session.add(idx)
-        else:
-            idx.web_id = str(web_id)
-            idx.description = en_sector
-        session.commit()
-
+    # Sector indices (from SECTOR_WEBID_MAP) فقط اگر قبلاً درج نشده باشند (درج صنایع در fetch_and_store_sector_list انجام می‌شود)
     session.close()
     print("[Index] All indices (main + sectors) stored in unified table.", flush=True)
 
