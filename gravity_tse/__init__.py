@@ -44,47 +44,41 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleW
 
 class SymbolManager:
     @staticmethod
-    def get_tse_webid(stock:str = 'پترول') -> pd.DataFrame:
+    def get_tse_webid(stock: str = 'پترول') -> pd.DataFrame:
         """
-        Takes ticker or firm's full name, does a live search in TSE new website and returns a multi-index Pandas dataframe that contains the following columns:
-        Ticker: Symbol in the Tehran Stock Exchange.
-        Active: 1 shows the market in which the stock is currently trading. 
-        Name: firm's full name in the relevant market.
-        WebID: A numeric code that can be used for building request links and crawling the financial data of the given stock.
-        Market: Market name in Tehran Stock Exchange, markets the stock was traded in and is trading now (بورس، فرابورس، پایه زرد، پایه نارنجی، پایه قرمز).
-        :param stock: (str) Ticker or firm's full name. 
-        :return: (pd.DataFrame) A dataframe that contains Ticker, Active, WebID, Name and Market columns for the requested stock.
+        Looks up symbol info using MarketWatch data. Returns DataFrame with WebID and info for all matches.
+        Supports Persian and English names.
         """
+        # Download MarketWatch data
+        try:
+            r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=HEADERS)
+            main_text = r.text
+            df = pd.DataFrame((main_text.split('@')[2]).split(';'))
+            df = df[0].str.split(",", expand=True)
+            df = df.iloc[:, :23]
+            df.columns = ['WEB-ID','Ticker-Code','Ticker','Name','Time','Open','Final','Close','No','Volume','Value',
+                          'Low','High','Y-Final','EPS','Base-Vol','Unknown1','Unknown2','Sector','Day_UL','Day_LL','Share-No','Mkt-ID']
+            df['Ticker'] = df['Ticker'].apply(lambda x: characters.ar_to_fa(str(x).strip()))
+            df['Name'] = df['Name'].apply(lambda x: characters.ar_to_fa(str(x).strip()))
+        except Exception as e:
+            print(f'[SymbolManager] MarketWatch fetch error: {e}')
+            return None
 
-        def srch_req(srch_key):
-            srch_page = requests.get(f'https://cdn.tsetmc.com/api/Instrument/GetInstrumentSearch/{srch_key}', headers=HEADERS)
-            srch_res = pd.DataFrame(srch_page.json()['instrumentSearch'])
-            srch_res = srch_res[['lVal18AFC','lVal30','insCode','lastDate','cgrValCot']]
-            srch_res.columns = ['Ticker','Name','WebID','Active','Market']
-            srch_res['Name'] = srch_res['Name'].apply(lambda x : characters.ar_to_fa(' '.join([i.strip() for i in x.split('\u200c')]).strip()))
-            srch_res['Ticker'] = srch_res['Ticker'].apply(lambda x : characters.ar_to_fa(''.join(x.split('\u200c')).strip()))
-            srch_res['NameSplit'] = srch_res['Name'].apply(lambda x : ''.join(x.split()).strip())
-            srch_res['SymbolSplit'] = srch_res['Ticker'].apply(lambda x : ''.join(x.split()).strip())
-            srch_res['Active'] = pd.to_numeric(srch_res['Active'])
-            srch_res = srch_res.sort_values('Ticker')
-            srch_res = pd.DataFrame(srch_res[['Name','WebID','NameSplit','SymbolSplit','Market']].values, columns=['Name','WebID',
-                                    'NameSplit','SymbolSplit','Market'], index=pd.MultiIndex.from_frame(srch_res[['Ticker','Active']]))
-            return srch_res
-            if type(stock) != str:
-                print('Please Enetr a Valid Ticker or Name!')
-                return False
-            if(stock=='آ س پ'):
-                stock = 'آ.س.پ'
-            stock = characters.ar_to_fa(''.join(stock.split('\u200c')).strip())
-            first_name = stock.split()[0]
-            stock = ''.join(stock.split())
-            data = srch_req(first_name)
-            df_symbol = data[data['SymbolSplit'] == stock]
-            df_name = data[data['NameSplit'] == stock]
-            if len(df_symbol) > 0 :
-                df_symbol = df_symbol.sort_index(level=1,ascending=False).drop(['NameSplit','SymbolSplit'], axis=1)
-                df_symbol['Market'] = df_symbol['Market'].apply(lambda x: re.sub('[0-9]', '', x))
-                df_symbol['Market'] = df_symbol['Market'].map({'N':'بورس', 'Z':'فرابورس', 'D':'فرابورس', 'A':'پایه زرد', 'P':'پایه زرد', 'C':'پایه نارنجی', 'L':'پایه قرمز'})
+        # Normalize input
+        stock_norm = characters.ar_to_fa(str(stock).strip())
+        stock_norm_no_space = ''.join(stock_norm.split())
+
+        # Find matches by Ticker or Name (exact or normalized)
+        matches = df[(df['Ticker'] == stock_norm) | (df['Name'] == stock_norm) |
+                     (df['Ticker'].str.replace(' ', '') == stock_norm_no_space) |
+                     (df['Name'].str.replace(' ', '') == stock_norm_no_space)]
+
+        if matches.empty:
+            return None
+        # Return DataFrame with WEB-ID, Ticker, Name, Market
+        matches = matches[['WEB-ID','Ticker','Name','Sector']]
+        matches = matches.rename(columns={'WEB-ID':'WebID', 'Sector':'Market'})
+        return matches.reset_index(drop=True)
 
 class PriceHistoryManager:
     @staticmethod
@@ -126,50 +120,57 @@ class PriceHistoryManager:
                 print('Start date must be a day before end date!')
                 return
         ticker_no_df = SymbolManager.get_tse_webid(stock)
-        if(type(ticker_no_df)==bool):
-            return
+        if(type(ticker_no_df)==bool or ticker_no_df is None):
+            # Always return empty DataFrame if not found
+            return pd.DataFrame()
         df_history = pd.DataFrame({},columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No','Ticker','Name','Market']).set_index('Date')
-        for index, row in (ticker_no_df.reset_index()).iterrows():
-            try:
-                df_temp = get_price_data(ticker_no = row['WebID'],ticker = row['Ticker'],name = row['Name'],market = row['Market'])
-                df_history = pd.concat([df_history,df_temp])
-            except:
-                pass
-        df_history = df_history.sort_index(ascending=True)
-        df_history = df_history.reset_index()
-        df_history['Weekday']=df_history['Date'].dt.weekday
-        df_history['Weekday'] = df_history['Weekday'].apply(lambda x: calendar.day_name[x])
-        df_history['J-Date']=df_history['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
-        df_history = df_history.set_index('J-Date')
-        df_history=df_history[['Date','Weekday','Y-Final','Open','High','Low','Close','Final','Volume','Value','No','Ticker','Name','Market']]
-        cols = ['Y-Final','Open','High','Low','Close','Final','Volume','No','Value']
-        df_history[cols] = df_history[cols].apply(pd.to_numeric, axis=1)
-        df_history['Final(+1)'] = df_history['Final'].shift(+1)          
-        df_history['Market(+1)'] = df_history['Market'].shift(+1)        
-        df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
-                                              else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
-                                              else x['Final(+1)']),axis = 1)
-        df_history['Y-Final'] = df_history['temp']
-        df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
-        for col in cols:
-            df_history[col] = df_history[col].apply(lambda x: int(x))
-        if(adjust_price):
-            df_history['COEF'] = (df_history['Y-Final'].shift(-1)/df_history['Final']).fillna(1.0)
-            df_history['ADJ-COEF']=df_history.iloc[::-1]['COEF'].cumprod().iloc[::-1]
-            df_history['Adj Open'] = (df_history['Open']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-            df_history['Adj High'] = (df_history['High']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-            df_history['Adj Low'] = (df_history['Low']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-            df_history['Adj Close'] = (df_history['Close']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-            df_history['Adj Final'] = (df_history['Final']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-            df_history.drop(columns=['COEF','ADJ-COEF'],inplace=True)
-        if(not show_weekday):
-            df_history.drop(columns=['Weekday'],inplace=True)
-        if(not double_date):
-            df_history.drop(columns=['Date'],inplace=True)
-        df_history.drop(columns=['Y-Final'],inplace=True)
-        if(not ignore_date):
-            df_history = df_history[start_date:end_date]
-        return df_history
+        try:
+            for index, row in (ticker_no_df.reset_index()).iterrows():
+                try:
+                    df_temp = get_price_data(ticker_no = row['WebID'],ticker = row['Ticker'],name = row['Name'],market = row['Market'])
+                    df_history = pd.concat([df_history,df_temp])
+                except Exception as e:
+                    pass
+            if df_history.empty:
+                return pd.DataFrame()
+            df_history = df_history.sort_index(ascending=True)
+            df_history = df_history.reset_index()
+            df_history['Weekday']=df_history['Date'].dt.weekday
+            df_history['Weekday'] = df_history['Weekday'].apply(lambda x: calendar.day_name[x])
+            df_history['J-Date']=df_history['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+            df_history = df_history.set_index('J-Date')
+            df_history=df_history[['Date','Weekday','Y-Final','Open','High','Low','Close','Final','Volume','Value','No','Ticker','Name','Market']]
+            cols = ['Y-Final','Open','High','Low','Close','Final','Volume','No','Value']
+            df_history[cols] = df_history[cols].apply(pd.to_numeric, axis=1)
+            df_history['Final(+1)'] = df_history['Final'].shift(+1)          
+            df_history['Market(+1)'] = df_history['Market'].shift(+1)        
+            df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
+                                                  else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
+                                                  else x['Final(+1)']),axis = 1)
+            df_history['Y-Final'] = df_history['temp']
+            df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
+            for col in cols:
+                df_history[col] = df_history[col].apply(lambda x: int(x))
+            if(adjust_price):
+                df_history['COEF'] = (df_history['Y-Final'].shift(-1)/df_history['Final']).fillna(1.0)
+                df_history['ADJ-COEF']=df_history.iloc[::-1]['COEF'].cumprod().iloc[::-1]
+                df_history['Adj Open'] = (df_history['Open']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+                df_history['Adj High'] = (df_history['High']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+                df_history['Adj Low'] = (df_history['Low']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+                df_history['Adj Close'] = (df_history['Close']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+                df_history['Adj Final'] = (df_history['Final']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+                df_history.drop(columns=['COEF','ADJ-COEF'],inplace=True)
+            if(not show_weekday):
+                df_history.drop(columns=['Weekday'],inplace=True)
+            if(not double_date):
+                df_history.drop(columns=['Date'],inplace=True)
+            df_history.drop(columns=['Y-Final'],inplace=True)
+            if(not ignore_date):
+                df_history = df_history[start_date:end_date]
+            return df_history
+        except Exception as e:
+            # On any error, return empty DataFrame
+            return pd.DataFrame()
 
     def __init__(self):
         self.headers = HEADERS
