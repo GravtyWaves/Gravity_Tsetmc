@@ -9,6 +9,7 @@ from app.db import Base, engine, SessionLocal, init_db
 from app.list_fetcher import fetch_and_store_symbol_list, fetch_and_store_market_list, fetch_and_store_sector_list, fetch_and_store_panel_list, fetch_and_store_index_list
 from app.fetcher import fetch_and_store_symbol_prices, fetch_and_store_index_prices
 from app.usd_fetcher import fetch_and_store_usd_irr_prices
+from gravity_tse import SymbolManager
 
 # Configure stdout for UTF-8
 if sys.platform == "win32":
@@ -201,6 +202,24 @@ def cmd_update_all():
         return 0
 
 
+def cmd_check_webid(symbols):
+    """Check and print WebID lookup result for given symbols"""
+    print("[✓] Checking WebID for symbols...")
+    for symbol in symbols:
+        print(f"Symbol: {symbol}")
+        try:
+            result = SymbolManager.get_tse_webid(symbol)
+            if result is None or (isinstance(result, bool) and not result):
+                print("  [✗] No WebID found.")
+            else:
+                print(f"  [✓] WebID lookup result:")
+                print(result)
+        except Exception as e:
+            print(f"  [✗] Error: {e}")
+    print("[✓] Done.")
+    return 0
+
+
 def main():
     """Main CLI entry point"""
     parser = argparse.ArgumentParser(
@@ -235,8 +254,12 @@ Examples:
     update_parser.add_argument("--symbols", nargs="*", metavar="SYMBOL", help="Update specific symbols (leave empty for all)")
     update_parser.add_argument("--indices", nargs="*", metavar="INDEX", help="Update specific indices (leave empty for all)")
     update_parser.add_argument("--usd", action="store_true", help="Update USD/IRR prices")
-    
+
     subparsers.add_parser("update-all", help="Update all data")
+
+    # Diagnostic: check-webid command
+    check_webid_parser = subparsers.add_parser("check-webid", help="Check WebID lookup for symbols")
+    check_webid_parser.add_argument("--symbols", nargs="+", metavar="SYMBOL", required=True, help="Symbols to check WebID for")
     
     # Reset commands
     reset_parser = subparsers.add_parser("reset", help="Reset and reload database")
@@ -289,6 +312,9 @@ Examples:
     
     elif args.command == "update-all":
         return cmd_update_all()
+    
+    elif args.command == "check-webid":
+        return cmd_check_webid(args.symbols)
     
     elif args.command == "reset":
         print("[!] Reset functionality not yet implemented")
