@@ -1,0 +1,77 @@
+erDiagram
+    SYMBOLS ||--o{ PRICES : has
+    SYMBOLS ||--o{ RI_DATA : has
+    INDICES ||--o{ INDEX_PRICES : has
+    SECTORS ||--o{ SYMBOLS : contains
+    MARKETS ||--o{ SYMBOLS : contains
+    PANELS ||--o{ SYMBOLS : contains
+    USD_IRR ||--o{ USD_PRICES : has
+    
+    SYMBOLS {
+        string symbol_en PK
+        string symbol_fa
+        string name
+        float market_id FK
+        float sector_id FK
+        float panel_id FK
+    }
+    
+    PRICES {
+        string symbol FK
+        string date PK
+        float open
+        float high
+        float low
+        float close
+        float final
+        float adjusted_close
+        int volume
+    }
+    
+    INDICES {
+        int id PK
+        string name
+        string type
+        float sector_id FK
+        string web_id
+    }
+    
+    INDEX_PRICES {
+        int index_id FK
+        string date PK
+        float open
+        float high
+        float low
+        float close
+        float final
+    }
+    
+    SECTORS {
+        float sector_id PK
+        string name_fa
+        string name_en
+    }
+    
+    MARKETS {
+        float market_id PK
+        string name
+    }
+    
+    RI_DATA {
+        string symbol FK
+        string date PK
+        int no_buy_r
+        int no_buy_i
+        int no_sell_r
+        int no_sell_i
+        int vol_buy_r
+        int vol_buy_i
+        int vol_sell_r
+        int vol_sell_i
+    }
+    
+    USD_PRICES {
+        string date PK
+        float buy_price
+        float sell_price
+    }
