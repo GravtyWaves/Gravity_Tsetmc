@@ -1,4 +1,4 @@
-from finpy_tse import Get_USD_RIAL
+from gravity_tse import Get_USD_RIAL
 from .db import SessionLocal, UsdIrrPrice
 import pandas as pd
 
