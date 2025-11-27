@@ -73,12 +73,18 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
                     low=row_dict.get('low'),
                     close=row_dict.get('close'),
                     final=row_dict.get('final'),
-                    last=row_dict.get('last'),
+                    # ستون last حذف شد
                     volume=row_dict.get('volume'),
                     value=row_dict.get('value'),
                     count=row_dict.get('no'),
                     adjusted_close=row_dict.get('adjclose'),
-                    gregorian_date=row_dict.get('date'),
+                    # ستون gregorian_date حذف شد
+                    adj_open=row_dict.get('adjopen') or row_dict.get('adj open'),
+                    adj_high=row_dict.get('adjhigh') or row_dict.get('adj high'),
+                    adj_low=row_dict.get('adjlow') or row_dict.get('adj low'),
+                    adj_close=row_dict.get('adjclose') or row_dict.get('adj close'),
+                    adj_final=row_dict.get('adjfinal') or row_dict.get('adj final'),
+                    adj_volume=(row_dict.get('adjfinal') or row_dict.get('adj final')) and row_dict.get('volume') and (float(row_dict.get('adjfinal') or row_dict.get('adj final')) * float(row_dict.get('volume')) / float(row_dict.get('adjfinal') or row_dict.get('adj final')) if float(row_dict.get('adjfinal') or row_dict.get('adj final')) != 0 else None),
                 )
                 # Only pass valid keys
                 price = SymbolPrice(**{k: v for k, v in price_kwargs.items() if k in SymbolPrice.__table__.columns.keys()})
@@ -101,36 +107,27 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
 
 
 def fetch_and_store_index_prices(indices=None, adjust=False):
-    """Fetch and store index prices. If indices is empty, fetch main indices."""
+
+    """Fetch and store index prices. If indices is empty, fetch all from gravity_tse.get_all_indices."""
     session = SessionLocal()
-    
-
-    # شاخص‌های اصلی بازار
-    main_indices = [
-        ("شاخص کل", 32097828799138957),
-        ("شاخص هم وزن", 67130298613737946),
-        ("شاخص 30 شرکت بزرگ", 10523825119011581)
-    ]
-
-    # دریافت لیست صنایع و WebIDها
-    from gravity_tse import get_sector_webid_map
-    sector_map = get_sector_webid_map()
-    sector_indices = [(sector, webid) for sector, webid in sector_map.items()]
-
-    # ترکیب شاخص‌های اصلی و صنایع
-    all_indices = main_indices + sector_indices
-    print(f"[IndexPrice] Fetching prices for {len(all_indices)} indices (main + sectors)...", flush=True)
+    from gravity_tse import get_all_indices
+    if indices is None or not indices:
+        indices = get_all_indices()
+    print(f"[IndexPrice] Fetching prices for {len(indices)} indices (main + sector)...", flush=True)
 
     success_count = 0
     error_count = 0
 
-    for i, (index_name, webid) in enumerate(all_indices, 1):
+    for i, idx in enumerate(indices, 1):
+        index_name = idx["name"]
+        webid = idx["web_id"]
+        idx_type = idx.get("type", "sector")
         try:
-            print(f"[{i}/{len(all_indices)}] Processing index: {index_name}", flush=True)
+            print(f"[{i}/{len(indices)}] Processing index: {index_name} (type: {idx_type})", flush=True)
             # ثبت یا دریافت رکورد شاخص
             idx_obj = session.query(Index).filter_by(name=index_name).first()
             if not idx_obj:
-                idx_obj = Index(name=index_name, type='sector', description=index_name, web_id=str(webid))
+                idx_obj = Index(name=index_name, type=idx_type, description=index_name, web_id=str(webid))
                 session.add(idx_obj)
                 session.commit()
                 print(f"  [✓] Created index record for {index_name}", flush=True)
@@ -142,7 +139,7 @@ def fetch_and_store_index_prices(indices=None, adjust=False):
             try:
                 url = f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={webid}&t=ph'
                 import requests
-                r = requests.get(url)
+                r = requests.get(url, timeout=10)
             except Exception as e:
                 print(f"  [✗] Error fetching data for {index_name}: {e}", flush=True)
                 error_count += 1
@@ -169,15 +166,21 @@ def fetch_and_store_index_prices(indices=None, adjust=False):
 
             # ذخیره در دیتابیس
             count = 0
-            for idx, row in df.iterrows():
-                date_val = str(idx)
+            for idx_row, row in df.iterrows():
+                date_val = str(idx_row)
                 if not date_val or pd.isnull(date_val):
                     continue
+                open_val = row['Open']
+                if pd.isnull(open_val) or open_val == 0:
+                    prev_idx = df.index.get_loc(idx_row) - 1
+                    if prev_idx >= 0:
+                        prev_close = df.iloc[prev_idx]['Close']
+                        open_val = prev_close
                 price_kwargs = dict(
                     index_id=idx_obj.id,
                     date=date_val,
                     gregorian_date=row['Date'].strftime('%Y-%m-%d') if not pd.isnull(row['Date']) else None,
-                    open=row['Open'],
+                    open=open_val,
                     high=row['High'],
                     low=row['Low'],
                     close=row['Close'],
