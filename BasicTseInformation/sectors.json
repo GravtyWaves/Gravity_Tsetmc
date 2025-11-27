@@ -1,98 +1,147 @@
+
 [
     {
-        "SectorID":55.0,
-        "SectorName":"هتل و رستوران"
+        "SectorCode": 55.0,
+        "SectorName": "هتل و رستوران",
+        "EnglishName": "Hotels and Restaurants",
+        "USEquivalent": "Consumer Discretionary"
     },
     {
-        "SectorID":72.0,
-        "SectorName":"رایانه و فعالیت های وابسته به آن"
+        "SectorCode": 72.0,
+        "SectorName": "رایانه و فعالیت های وابسته به آن",
+        "EnglishName": "Computer and Related Activities",
+        "USEquivalent": "Information Technology"
     },
     {
-        "SectorID":27.0,
-        "SectorName":"فلزات اساسی"
+        "SectorCode": 27.0,
+        "SectorName": "فلزات اساسی",
+        "EnglishName": "Basic Metals",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":13.0,
-        "SectorName":"استخراج کانه های فلزی"
+        "SectorCode": 13.0,
+        "SectorName": "استخراج کانه های فلزی",
+        "EnglishName": "Metal Ore Mining",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":64.0,
-        "SectorName":"مخابرات"
+        "SectorCode": 64.0,
+        "SectorName": "مخابرات",
+        "EnglishName": "Telecommunications",
+        "USEquivalent": "Communication Services"
     },
     {
-        "SectorID":53.0,
-        "SectorName":"سیمان، آهک و گچ"
+        "SectorCode": 53.0,
+        "SectorName": "سیمان، آهک و گچ",
+        "EnglishName": "Cement, Lime and Gypsum",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":73.0,
-        "SectorName":"اطلاعات و ارتباطات"
+        "SectorCode": 73.0,
+        "SectorName": "اطلاعات و ارتباطات",
+        "EnglishName": "Information and Communication",
+        "USEquivalent": "Communication Services"
     },
     {
-        "SectorID":47.0,
-        "SectorName":"خرده فروشی،باستثنای وسایل نقلیه موتوری"
+        "SectorCode": 47.0,
+        "SectorName": "خرده فروشی، باستثنای وسایل نقلیه موتوری",
+        "EnglishName": "Retail Trade, Except Motor Vehicles",
+        "USEquivalent": "Consumer Discretionary"
     },
     {
-        "SectorID":67.0,
-        "SectorName":"فعالیتهای کمکی به نهادهای مالی واسط"
+        "SectorCode": 67.0,
+        "SectorName": "فعالیتهای کمکی به نهادهای مالی واسط",
+        "EnglishName": "Auxiliary Activities for Financial Intermediation",
+        "USEquivalent": "Financials"
     },
     {
-        "SectorID":31.0,
-        "SectorName":"ماشین آلات و دستگاه های برقی"
+        "SectorCode": 31.0,
+        "SectorName": "ماشین آلات و دستگاه های برقی",
+        "EnglishName": "Electrical Machinery and Apparatus",
+        "USEquivalent": "Industrials"
     },
     {
-        "SectorID":43.0,
-        "SectorName":"مواد و محصولات دارویی"
+        "SectorCode": 43.0,
+        "SectorName": "مواد و محصولات دارویی",
+        "EnglishName": "Pharmaceutical Materials and Products",
+        "USEquivalent": "Health Care"
     },
     {
-        "SectorID":44.0,
-        "SectorName":"محصولات شیمیایی"
+        "SectorCode": 44.0,
+        "SectorName": "محصولات شیمیایی",
+        "EnglishName": "Chemical Products",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":25.0,
-        "SectorName":"لاستیک و پلاستیک"
+        "SectorCode": 25.0,
+        "SectorName": "لاستیک و پلاستیک",
+        "EnglishName": "Rubber and Plastic",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":56.0,
-        "SectorName":"سرمایه گذاریها"
+        "SectorCode": 56.0,
+        "SectorName": "سرمایه گذاریها",
+        "EnglishName": "Investments",
+        "USEquivalent": "Financials"
     },
     {
-        "SectorID":70.0,
-        "SectorName":"انبوه سازی، املاک و مستغلات"
+        "SectorCode": 70.0,
+        "SectorName": "انبوه سازی، املاک و مستغلات",
+        "EnglishName": "Mass Construction, Real Estate",
+        "USEquivalent": "Real Estate"
     },
     {
-        "SectorID":22.0,
-        "SectorName":"انتشار، چاپ و تکثیر"
+        "SectorCode": 22.0,
+        "SectorName": "انتشار، چاپ و تکثیر",
+        "EnglishName": "Publishing, Printing and Reproduction",
+        "USEquivalent": "Communication Services"
     },
     {
-        "SectorID":28.0,
-        "SectorName":"ساخت محصولات فلزی"
+        "SectorCode": 28.0,
+        "SectorName": "ساخت محصولات فلزی",
+        "EnglishName": "Fabricated Metal Products",
+        "USEquivalent": "Industrials"
     },
     {
-        "SectorID":20.0,
-        "SectorName":"محصولات چوبی"
+        "SectorCode": 20.0,
+        "SectorName": "محصولات چوبی",
+        "EnglishName": "Wood Products",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":21.0,
-        "SectorName":"محصولات کاغذی"
+        "SectorCode": 21.0,
+        "SectorName": "محصولات کاغذی",
+        "EnglishName": "Paper Products",
+        "USEquivalent": "Materials"
     },
     {
-        "SectorID":60.0,
-        "SectorName":"حمل ونقل، انبارداری و ارتباطات"
+        "SectorCode": 60.0,
+        "SectorName": "حمل ونقل، انبارداری و ارتباطات",
+        "EnglishName": "Transportation, Storage and Communications",
+        "USEquivalent": "Industrials"
     },
     {
-        "SectorID":11.0,
-        "SectorName":"استخراج نفت گاز و خدمات جنبی جز اکتشاف"
+        "SectorCode": 11.0,
+        "SectorName": "استخراج نفت گاز و خدمات جنبی جز اکتشاف",
+        "EnglishName": "Oil and Gas Extraction and Related Services (Except Exploration)",
+        "USEquivalent": "Energy"
     },
     {
-        "SectorID":34.0,
-        "SectorName":"خودرو و ساخت قطعات"
+        "SectorCode": 34.0,
+        "SectorName": "خودرو و ساخت قطعات",
+        "EnglishName": "Automobile and Parts Manufacturing",
+        "USEquivalent": "Consumer Discretionary"
     },
     {
-        "SectorID":74.0,
-        "SectorName":"خدمات فنی و مهندسی"
+        "SectorCode": 74.0,
+        "SectorName": "خدمات فنی و مهندسی",
+        "EnglishName": "Technical and Engineering Services",
+        "USEquivalent": "Industrials"
     },
     {
-        "SectorID":1.0,
-        "SectorName":"زراعت و خدمات وابسته"
+        "SectorCode": 1.0,
+        "SectorName": "زراعت و خدمات وابسته",
+        "EnglishName": "Agriculture and Related Services",
+        "USEquivalent": "Consumer Staples"
     }
 ]
