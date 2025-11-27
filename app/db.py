@@ -111,7 +111,7 @@ class SymbolPrice(Base):
     
     symbol = Column(String(20), ForeignKey("symbol_list.symbol_en"), primary_key=True, index=True)
     date = Column(String(10), primary_key=True, index=True)  # تاریخ جلالی (YYYY-MM-DD)
-    gregorian_date = Column(String(10), index=True, nullable=True)  # تاریخ میلادی
+    # ستون gregorian_date حذف شد چون داده ندارد
     
     # قیمت‌ها
     open = Column(Float, nullable=True)
@@ -119,7 +119,7 @@ class SymbolPrice(Base):
     low = Column(Float, nullable=True)
     close = Column(Float, nullable=True)
     final = Column(Float, nullable=True)  # قیمت پایانی
-    last = Column(Float, nullable=True)  # آخرین قیمت
+    # ستون last حذف شد چون داده ندارد
     
     # حجم و ارزش
     volume = Column(Float, nullable=True)  # تعداد سهام
@@ -127,7 +127,7 @@ class SymbolPrice(Base):
     count = Column(Integer, nullable=True)  # تعداد معاملات
     
     # قیمت‌های تعدیل‌شده
-    adjusted_close = Column(Float, nullable=True)
+    # حذف ستون‌های تعدیل‌شده اگر همه داده‌هایشان null است
     
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
