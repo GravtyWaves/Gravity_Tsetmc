@@ -317,8 +317,39 @@ Examples:
         return cmd_check_webid(args.symbols)
     
     elif args.command == "reset":
-        print("[!] Reset functionality not yet implemented")
-        return 1
+        if args.symbol_prices:
+            from app.db import reset_table, SymbolPrice
+            from app.fetcher import fetch_and_store_symbol_prices
+            print("[CLI] Resetting symbol_prices table...")
+            try:
+                reset_table(SymbolPrice)
+                print("[CLI] symbol_prices table reset successfully.")
+                print("[CLI] Repopulating symbol_prices table for all symbols (with adjusted prices)...")
+                fetch_and_store_symbol_prices(adjust=True)
+                print("[CLI] symbol_prices table repopulated successfully.")
+                return 0
+            except Exception as e:
+                print(f"[✗] Error resetting or repopulating symbol_prices table: {e}")
+                return 1
+        elif args.index_prices:
+            from app.db import reset_table, IndexPrice
+            from app.fetcher import fetch_and_store_index_prices
+            from gravity_tse import get_all_indices
+            print("[CLI] Resetting index_prices table...")
+            try:
+                reset_table(IndexPrice)
+                print("[CLI] index_prices table reset successfully.")
+                print("[CLI] Repopulating index_prices table for all indices (main + sector)...")
+                all_indices = get_all_indices()
+                fetch_and_store_index_prices(indices=all_indices)
+                print("[CLI] index_prices table repopulated successfully for all indices.")
+                return 0
+            except Exception as e:
+                print(f"[✗] Error resetting or repopulating index_prices table: {e}")
+                return 1
+        else:
+            print("[!] No reset target specified. Use --symbol-prices or --index-prices to reset tables.")
+            return 1
     
     elif args.command == "status":
         print("[!] Status functionality not yet implemented")
