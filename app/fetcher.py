@@ -4,11 +4,7 @@ import pandas as pd
 from datetime import datetime
 import jdatetime
 
-<<<<<<< HEAD
 from gravity_tse import PriceHistoryManager, Get_RI_History, Get_ShareHoldersInfo, USDManager
-=======
-from gravity_tse import PriceHistoryManager
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
 
 # Configure logging
 logging.basicConfig(
@@ -16,11 +12,7 @@ logging.basicConfig(
     format='[%(levelname)s] %(asctime)s: %(message)s'
 )
 
-<<<<<<< HEAD
 from .db import SessionLocal, SymbolPrice, IndexPrice, Index, SymbolList, RIData, ShareholdersInfo, UsdIrrPrice
-=======
-from .db import SessionLocal, SymbolPrice, IndexPrice, Index, SymbolList
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
 
 
 
@@ -28,21 +20,20 @@ from .db import SessionLocal, SymbolPrice, IndexPrice, Index, SymbolList
 def fetch_and_store_symbol_prices(symbols=None, adjust=False):
     """Fetch and store symbol prices. If symbols is empty, fetch all."""
     session = SessionLocal()
-    
+
     # اگر symbols خالی است، همه نمادها را از دیتابیس بگیر
     if not symbols:
         symbol_records = session.query(SymbolList).all()
         symbols = [(s.symbol_fa, s.symbol_en) for s in symbol_records]
-    
+
     total_symbols = len(symbols) if isinstance(symbols, list) else len(list(symbols))
     print(f"[SymbolPrice] Fetching prices for {total_symbols} symbols...", flush=True)
-    
+
     success_count = 0
     skip_count = 0
     error_count = 0
-    
+
     for i, symbol_pair in enumerate(symbols, 1):
-<<<<<<< HEAD
         # Handle different input types: tuples, objects, or strings
         if isinstance(symbol_pair, tuple):
             symbol_fa, symbol_en = symbol_pair
@@ -57,21 +48,15 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
             symbol_en = symbol_record.symbol_en
         else:
             # Assume it's an object with symbol_fa and symbol_en attributes
-=======
-        # Handle both tuple pairs and symbol objects
-        if isinstance(symbol_pair, tuple):
-            symbol_fa, symbol_en = symbol_pair
-        else:
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
             symbol_fa = symbol_pair.symbol_fa
             symbol_en = symbol_pair.symbol_en
-        
+
         # Check if already exists
         exists = session.query(SymbolPrice).filter_by(symbol=symbol_en).first()
         if exists:
             skip_count += 1
             continue
-        
+
         try:
             print(f"[{i}/{total_symbols}] Fetching {symbol_fa}...", flush=True)
             df = PriceHistoryManager.get_price_history(symbol_fa, adjust_price=adjust, ignore_date=True)
@@ -90,7 +75,6 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
                     k_normalized = str(k).lower().strip().replace(' ', '')
                     row_dict[k_normalized] = v
                 # Map to SymbolPrice fields
-<<<<<<< HEAD
                 # تبدیل تاریخ جلالی به میلادی برای gregorian_date
                 try:
                     jalali_date = date_val
@@ -102,38 +86,20 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
                     symbol=symbol_en,
                     date=date_val,
                     gregorian_date=gregorian_date,
-=======
-                price_kwargs = dict(
-                    symbol=symbol_en,
-                    date=date_val,
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
                     open=row_dict.get('open'),
                     high=row_dict.get('high'),
                     low=row_dict.get('low'),
                     close=row_dict.get('close'),
                     final=row_dict.get('final'),
-<<<<<<< HEAD
                     volume=row_dict.get('volume'),
                     value=row_dict.get('value'),
                     count=row_dict.get('no'),
-=======
-                    # ستون last حذف شد
-                    volume=row_dict.get('volume'),
-                    value=row_dict.get('value'),
-                    count=row_dict.get('no'),
-                    adjusted_close=row_dict.get('adjclose'),
-                    # ستون gregorian_date حذف شد
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
                     adj_open=row_dict.get('adjopen') or row_dict.get('adj open'),
                     adj_high=row_dict.get('adjhigh') or row_dict.get('adj high'),
                     adj_low=row_dict.get('adjlow') or row_dict.get('adj low'),
                     adj_close=row_dict.get('adjclose') or row_dict.get('adj close'),
                     adj_final=row_dict.get('adjfinal') or row_dict.get('adj final'),
-<<<<<<< HEAD
                     adj_volume=row_dict.get('adjvolume') or row_dict.get('adj volume') or row_dict.get('volume'),  # Adjusted volume if available, else regular volume
-=======
-                    adj_volume=(row_dict.get('adjfinal') or row_dict.get('adj final')) and row_dict.get('volume') and (float(row_dict.get('adjfinal') or row_dict.get('adj final')) * float(row_dict.get('volume')) / float(row_dict.get('adjfinal') or row_dict.get('adj final')) if float(row_dict.get('adjfinal') or row_dict.get('adj final')) != 0 else None),
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
                 )
                 # Only pass valid keys
                 price = SymbolPrice(**{k: v for k, v in price_kwargs.items() if k in SymbolPrice.__table__.columns.keys()})
@@ -149,7 +115,7 @@ def fetch_and_store_symbol_prices(symbols=None, adjust=False):
             print(f"  [✗] Error fetching {symbol_fa}: {e}", flush=True)
             error_count += 1
             session.rollback()
-    
+
     session.close()
     print(f"[SymbolPrice] Complete: {success_count} success, {skip_count} skipped, {error_count} errors", flush=True)
 
@@ -254,7 +220,6 @@ def fetch_and_store_index_prices(indices=None, adjust=False):
     session.close()
     print(f"[IndexPrice] Complete: {success_count} success, {error_count} errors", flush=True)
 
-<<<<<<< HEAD
 
 def fetch_and_store_ri_data(symbols=None):
     """Fetch and store RI data for symbols. If symbols is empty, fetch all."""
@@ -503,6 +468,3 @@ def fetch_and_store_usd_irr_prices():
 
     session.close()
     print("[UsdIrrPrice] Complete", flush=True)
-
-=======
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
