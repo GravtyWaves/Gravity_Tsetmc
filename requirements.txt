@@ -24,6 +24,7 @@ pytest-mock>=3.6.0,<4.0.0
 # Code quality
 flake8>=4.0.0,<5.0.0
 black>=23.0.0,<24.0.0
+isort>=5.10.0,<6.0.0
 
 # Optional: Jupyter notebook support (if needed)
 # jupyter>=1.0.0,<2.0.0
