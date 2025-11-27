@@ -7,7 +7,11 @@ import argparse
 import sys
 from app.db import Base, engine, SessionLocal, init_db
 from app.list_fetcher import fetch_and_store_symbol_list, fetch_and_store_market_list, fetch_and_store_sector_list, fetch_and_store_panel_list, fetch_and_store_index_list
+<<<<<<< HEAD
 from app.fetcher import fetch_and_store_symbol_prices, fetch_and_store_index_prices, fetch_and_store_ri_data, fetch_and_store_shareholders_info
+=======
+from app.fetcher import fetch_and_store_symbol_prices, fetch_and_store_index_prices
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
 from app.usd_fetcher import fetch_and_store_usd_irr_prices
 from gravity_tse import SymbolManager
 
@@ -155,6 +159,7 @@ def cmd_update_indices(indices=None):
         return 1
 
 
+<<<<<<< HEAD
 def cmd_update_ri(symbols=None):
     """Update RI data for symbols"""
     print(f"[✓] Updating RI data...")
@@ -183,6 +188,8 @@ def cmd_update_shareholders(symbols=None):
         return 1
 
 
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
 def cmd_update_usd():
     """Update USD/IRR prices"""
     print("[✓] Updating USD/IRR prices...")
@@ -196,6 +203,7 @@ def cmd_update_usd():
 
 
 def cmd_update_all():
+<<<<<<< HEAD
     """Update all data (symbols, indices, RI, shareholders, USD)"""
     print("\n" + "="*60)
     print("  GRAVITY TSETMC - Update All Data")
@@ -206,6 +214,16 @@ def cmd_update_all():
         ("Index Prices", lambda: cmd_update_indices()),
         ("RI Data", lambda: cmd_update_ri()),
         ("Shareholders Info", lambda: cmd_update_shareholders()),
+=======
+    """Update all data (symbols, indices, USD)"""
+    print("\n" + "="*60)
+    print("  GRAVITY TSETMC - Update All Data")
+    print("="*60 + "\n")
+    
+    updates = [
+        ("Symbol Prices", lambda: cmd_update_symbols()),
+        ("Index Prices", lambda: cmd_update_indices()),
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
         ("USD/IRR Prices", cmd_update_usd),
     ]
     
@@ -262,8 +280,11 @@ Examples:
   python cli.py init --symbols        # Initialize only symbols
   python cli.py update --symbols KHRO FMLI  # Update specific symbols
   python cli.py update --indices "شاخص کل" # Update specific index
+<<<<<<< HEAD
   python cli.py update --ri KHRO FMLI     # Update RI data for specific symbols
   python cli.py update --shareholders KHRO FMLI  # Update shareholders for specific symbols
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
   python cli.py update --usd          # Update USD/IRR prices
         """
     )
@@ -285,8 +306,11 @@ Examples:
     update_parser = subparsers.add_parser("update", help="Update database data")
     update_parser.add_argument("--symbols", nargs="*", metavar="SYMBOL", help="Update specific symbols (leave empty for all)")
     update_parser.add_argument("--indices", nargs="*", metavar="INDEX", help="Update specific indices (leave empty for all)")
+<<<<<<< HEAD
     update_parser.add_argument("--ri", nargs="*", metavar="SYMBOL", help="Update RI data for specific symbols (leave empty for all)")
     update_parser.add_argument("--shareholders", nargs="*", metavar="SYMBOL", help="Update shareholders info for specific symbols (leave empty for all)")
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
     update_parser.add_argument("--usd", action="store_true", help="Update USD/IRR prices")
 
     subparsers.add_parser("update-all", help="Update all data")
@@ -331,19 +355,29 @@ Examples:
         return cmd_init_all()
     
     elif args.command == "update":
+<<<<<<< HEAD
         if not any([args.symbols is not None, args.indices is not None, args.ri is not None, args.shareholders is not None, args.usd]):
             # Update all if nothing specified
             return cmd_update_all()
 
+=======
+        if not any([args.symbols is not None, args.indices is not None, args.usd]):
+            # Update all if nothing specified
+            return cmd_update_all()
+        
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
         code = 0
         if args.symbols is not None:
             code |= cmd_update_symbols(args.symbols if args.symbols else None)
         if args.indices is not None:
             code |= cmd_update_indices(args.indices if args.indices else None)
+<<<<<<< HEAD
         if args.ri is not None:
             code |= cmd_update_ri(args.ri if args.ri else None)
         if args.shareholders is not None:
             code |= cmd_update_shareholders(args.shareholders if args.shareholders else None)
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
         if args.usd:
             code |= cmd_update_usd()
         return code

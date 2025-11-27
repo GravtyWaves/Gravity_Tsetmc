@@ -1,3 +1,4 @@
 # Python virtual environment
 .venv/
 *.db
+tsetmc_data.db

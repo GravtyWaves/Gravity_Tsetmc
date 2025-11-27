@@ -42,8 +42,11 @@ class Sector(Base):
     sector_id = Column(Float, primary_key=True, index=True)
     sector_name = Column(String(100), nullable=False, unique=True, index=True)
     sector_name_en = Column(String(100), nullable=True)
+<<<<<<< HEAD
     english_name = Column(String(100), nullable=True)  # EnglishName from sectors.json
     us_equivalent = Column(String(100), nullable=True)  # USEquivalent from sectors.json
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -78,7 +81,10 @@ class SymbolList(Base):
     name = Column(String(200), nullable=False, index=True)  # نام شرکت
     name_en = Column(String(200), nullable=True)  # نام انگلیسی
     web_id = Column(String(50), unique=True, nullable=True, index=True)  # شناسه وب TSETMC
+<<<<<<< HEAD
     industry = Column(String(100), nullable=True)  # Industry from companies.json
+=======
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
     
     # Foreign keys
     market_id = Column(Float, ForeignKey("markets.market_id"), nullable=False, index=True)
@@ -114,7 +120,11 @@ class SymbolPrice(Base):
     
     symbol = Column(String(20), ForeignKey("symbol_list.symbol_en"), primary_key=True, index=True)
     date = Column(String(10), primary_key=True, index=True)  # تاریخ جلالی (YYYY-MM-DD)
+<<<<<<< HEAD
     gregorian_date = Column(String(10), index=True, nullable=True)  # تاریخ میلادی
+=======
+    # ستون gregorian_date حذف شد چون داده ندارد
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
     
     # قیمت‌ها
     open = Column(Float, nullable=True)
@@ -130,12 +140,16 @@ class SymbolPrice(Base):
     count = Column(Integer, nullable=True)  # تعداد معاملات
     
     # قیمت‌های تعدیل‌شده
+<<<<<<< HEAD
     adj_open = Column(Float, nullable=True)
     adj_high = Column(Float, nullable=True)
     adj_low = Column(Float, nullable=True)
     adj_close = Column(Float, nullable=True)
     adj_final = Column(Float, nullable=True)  # قیمت پایانی تعدیل‌شده
     adj_volume = Column(Float, nullable=True)  # حجم تعدیل‌شده
+=======
+    # حذف ستون‌های تعدیل‌شده اگر همه داده‌هایشان null است
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
     
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -338,3 +352,11 @@ def reset_all_tables():
 def get_session():
     """دریافت یک session برای کار با دیتابیس"""
     return SessionLocal()
+<<<<<<< HEAD
+=======
+
+
+def init_db():
+    """Initialize database and create all tables"""
+    Base.metadata.create_all(bind=engine)
+>>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
