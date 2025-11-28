@@ -140,7 +140,8 @@ def get_tse_webid(stock:str = 'پترول') -> pd.DataFrame:
 def __Get_TSE_WebID__(stock):
     # search TSE function ------------------------------------------------------------------------------------------------------------
     def request(name):
-        page = requests.get(f'https://old.tsetmc.com/tsev2/data/search.aspx?skey={name}', headers=headers)
+        client = BaseSyncClient()
+        page = client._make_request(f'https://old.tsetmc.com/tsev2/data/search.aspx?skey={name}')
         data = []
         for i in page.text.split(';') :
             try :
