@@ -2311,7 +2311,7 @@ def __get_history_data_group_parallel__(stock_list) :
             client = BaseAsyncClient()
             await client._ensure_session()
             session = client.session
-                tasks = []
+            tasks = []
                 for stock in stock_list:
                     #فرستادن دیتای مورد نیاز برای ارسال درخواست به تابع بالا 
                     task = asyncio.ensure_future(get_data(session, stock))
