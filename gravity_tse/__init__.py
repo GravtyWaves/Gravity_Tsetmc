@@ -2308,7 +2308,9 @@ def __get_history_data_group_parallel__(stock_list) :
                     return data
 
             #مدیریت درخواست ها
-            async with aiohttp.ClientSession() as session:
+            client = BaseAsyncClient()
+            await client._ensure_session()
+            session = client.session
                 tasks = []
                 for stock in stock_list:
                     #فرستادن دیتای مورد نیاز برای ارسال درخواست به تابع بالا 
@@ -2317,6 +2319,7 @@ def __get_history_data_group_parallel__(stock_list) :
                     tasks.append(task)
                 view_counts = await asyncio.gather(*tasks)
 
+            await client.close()
             return view_counts
 
 
