@@ -290,8 +290,12 @@ def get_price_history(stock:str = 'خودرو',
 
     # basic request and data cleaning function for historical price data of a ticker for a given market 
     def get_price_data(ticker_no, ticker, name, market):
-        r = requests.get(f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{ticker_no}/0', headers=headers)
-        df_history = pd.DataFrame(r.json()['closingPriceDaily'])
+        client = BaseSyncClient()
+        try:
+            r = client._make_request(f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{ticker_no}/0')
+            df_history = pd.DataFrame(r.json().get('closingPriceDaily', []))
+        except TSEConnectionError:
+            return pd.DataFrame(columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No','Ticker','Name','Market'])
         columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
         df_history = df_history[['dEven','priceMax','priceMin','pClosing','pDrCotVal','priceFirst','priceYesterday','qTotCap','qTotTran5J','zTotTran']]
         df_history.columns = ['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
