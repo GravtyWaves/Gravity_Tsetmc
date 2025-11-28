@@ -2,3 +2,10 @@
 .venv/
 *.db
 tsetmc_data.db
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+gravity_tse/gravity_tse.md
+*.sqlite3
+*.sqlite
