@@ -1,672 +1,627 @@
-sector_list = ['زراعت','ذغال سنگ','کانی فلزی','سایر معادن','منسوجات','محصولات چرمی','محصولات چوبی','محصولات کاغذی','انتشار و چاپ','فرآورده های نفتی','لاستیک',
-               'فلزات اساسی','محصولات فلزی','ماشین آلات','دستگاه های برقی','وسایل ارتباطی','خودرو','قند و شکر','چند رشته ای','تامین آب، برق و گاز','غذایی',
-               'دارویی','شیمیایی','خرده فروشی','کاشی و سرامیک','سیمان','کانی غیر فلزی','سرمایه گذاری','بانک','سایر مالی','حمل و نقل',
-               'رادیویی','مالی','اداره بازارهای مالی','انبوه سازی','رایانه','اطلاعات و ارتباطات','فنی مهندسی','استخراج نفت','بیمه و بازنشستگی']
-sector_web_id = [34408080767216529,19219679288446732,13235969998952202,62691002126902464,59288237226302898,69306841376553334,58440550086834602,30106839080444358,25766336681098389,
- 12331083953323969,36469751685735891,32453344048876642,1123534346391630,11451389074113298,33878047680249697,24733701189547084,20213770409093165,21948907150049163,40355846462826897,
- 54843635503648458,15508900928481581,3615666621538524,33626672012415176,65986638607018835,57616105980228781,70077233737515808,14651627750314021,34295935482222451,72002976013856737,
- 25163959460949732,24187097921483699,41867092385281437,61247168213690670,61985386521682984,4654922806626448,8900726085939949,18780171241610744,47233872677452574,65675836323214668,
- 59105676994811497]
-
 def get_sector_webid_map():
     """
     Returns a dictionary mapping sector names to their WebID.
     """
+    sector_list = ['زراعت','ذغال سنگ','کانی فلزی','سایر معادن','منسوجات','محصولات چرمی','محصولات چوبی','محصولات کاغذی','انتشار و چاپ','فرآورده های نفتی','لاستیک',
+                   'فلزات اساسی','محصولات فلزی','ماشین آلات','دستگاه های برقی','وسایل ارتباطی','خودرو','قند و شکر','چند رشته ای','تامین آب، برق و گاز','غذایی',
+                   'دارویی','شیمیایی','خرده فروشی','کاشی و سرامیک','سیمان','کانی غیر فلزی','سرمایه گذاری','بانک','سایر مالی','حمل و نقل',
+                   'رادیویی','مالی','اداره بازارهای مالی','انبوه سازی','رایانه','اطلاعات و ارتباطات','فنی مهندسی','استخراج نفت','بیمه و بازنشستگی']
+    sector_web_id = [34408080767216529,19219679288446732,13235969998952202,62691002126902464,59288237226302898,69306841376553334,58440550086834602,30106839080444358,25766336681098389,
+     12331083953323969,36469751685735891,32453344048876642,1123534346391630,11451389074113298,33878047680249697,24733701189547084,20213770409093165,21948907150049163,40355846462826897,
+     54843635503648458,15508900928481581,3615666621538524,33626672012415176,65986638607018835,57616105980228781,70077233737515808,14651627750314021,34295935482222451,72002976013856737,
+     25163959460949732,24187097921483699,41867092385281437,61247168213690670,61985386521682984,4654922806626448,8900726085939949,18780171241610744,47233872677452574,65675836323214668,
+     59105676994811497]
     return dict(zip(sector_list, sector_web_id))
-
-# Main indices (name, web_id)
-main_indices = [
-    {"name": "شاخص کل", "web_id": 32097828799138957},  # CWI
-    {"name": "شاخص کل هم وزن", "web_id": 67130298613737946},  # EWI
-]
-
-def get_all_indices():
-    """
-    Returns a list of dicts: [{"name": ..., "web_id": ...}] for all sector and main indices.
-    """
-    sector_indices = [
-        {"name": name, "web_id": web_id, "type": "sector"}
-        for name, web_id in zip(sector_list, sector_web_id)
-    ]
-    main_indices_with_type = [
-        dict(idx, type="main") for idx in main_indices
-    ]
-    return main_indices_with_type + sector_indices
 # imports:
 import pandas as pd
 import numpy as np
-<<<<<<< HEAD
-=======
 
+import requests
+from bs4 import BeautifulSoup
+import urllib3
+urllib3.disable_warnings()
 
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
-import datetime
-import time
+import aiohttp
+import asyncio
+from unsync import unsync
 import tracemalloc
-import requests
-from bs4 import BeautifulSoup
-import urllib3
-urllib3.disable_warnings()
-<<<<<<< HEAD
-import aiohttp
-import asyncio
-from unsync import unsync
+
+import datetime
 import jdatetime
 import calendar
+import time
 import re
+
 from persiantools import characters
 from IPython.display import clear_output
-from typing import Optional, Dict, List
-import logging
 
-# Import utilities
-from utils.logger import setup_logger
-from utils.exceptions import (
-    APIException, SymbolNotFoundException, DataValidationException
-)
+from .core import BaseSyncClient, TSEConnectionError
 
-# Setup logger
-logger = setup_logger(__name__)
-=======
-
-import aiohttp
-import asyncio
-from unsync import unsync
-import requests
-import pandas as pd
-import jdatetime
-import calendar
-import re
-from bs4 import BeautifulSoup
-import urllib3
-urllib3.disable_warnings()
-from unsync import unsync
-from persiantools import characters
-from IPython.display import clear_output
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
-
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-
-class SymbolManager:
-    @staticmethod
-    def get_tse_webid(stock: str = 'پترول') -> pd.DataFrame:
-        """
-        Looks up symbol info using MarketWatch data. Returns DataFrame with WebID and info for all matches.
-        Supports Persian and English names.
-        """
-        # Download MarketWatch data
-        try:
-            r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=HEADERS)
-            main_text = r.text
-            df = pd.DataFrame((main_text.split('@')[2]).split(';'))
-            df = df[0].str.split(",", expand=True)
-            df = df.iloc[:, :23]
-            df.columns = ['WEB-ID','Ticker-Code','Ticker','Name','Time','Open','Final','Close','No','Volume','Value',
-                          'Low','High','Y-Final','EPS','Base-Vol','Unknown1','Unknown2','Sector','Day_UL','Day_LL','Share-No','Mkt-ID']
-            df['Ticker'] = df['Ticker'].apply(lambda x: characters.ar_to_fa(str(x).strip()))
-            df['Name'] = df['Name'].apply(lambda x: characters.ar_to_fa(str(x).strip()))
-        except Exception as e:
-            print(f'[SymbolManager] MarketWatch fetch error: {e}')
-            return None
-
-        # Normalize input
-        stock_norm = characters.ar_to_fa(str(stock).strip())
-        stock_norm_no_space = ''.join(stock_norm.split())
-
-        # Find matches by Ticker or Name (exact or normalized)
-        matches = df[(df['Ticker'] == stock_norm) | (df['Name'] == stock_norm) |
-                     (df['Ticker'].str.replace(' ', '') == stock_norm_no_space) |
-                     (df['Name'].str.replace(' ', '') == stock_norm_no_space)]
-
-        if matches.empty:
-            return None
-        # Return DataFrame with WEB-ID, Ticker, Name, Market
-        matches = matches[['WEB-ID','Ticker','Name','Sector']]
-        matches = matches.rename(columns={'WEB-ID':'WebID', 'Sector':'Market'})
-        return matches.reset_index(drop=True)
-
-class PriceHistoryManager:
-    @staticmethod
-    def get_price_history(stock:str = 'خودرو', 
-                          start_date:str = '1400-01-01', 
-                          end_date:str = '1401-01-01', 
-                          ignore_date:bool = False, 
-                          adjust_price:bool = False, 
-                          show_weekday:bool = False, 
-                          double_date:bool = False) -> pd.DataFrame:
-        
-      
-     
-        def get_price_data(ticker_no, ticker, name, market):
-            r = requests.get(f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{ticker_no}/0', headers=HEADERS)
-            df_history = pd.DataFrame(r.json()['closingPriceDaily'])
-            columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
-            df_history = df_history[['dEven','priceMax','priceMin','pClosing','pDrCotVal','priceFirst','priceYesterday','qTotCap','qTotTran5J','zTotTran']]
-            df_history.columns = ['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
-            df_history['Date'] = df_history['Date'].apply(lambda x: str(x))
-            df_history['Date'] = df_history['Date'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[-2:]}')
-            df_history['Date']=pd.to_datetime(df_history['Date'])
-            df_history = df_history[df_history['No']!=0]
-            df_history['Ticker'] = ticker
-            df_history['Name'] = name
-            df_history['Market'] = market
-            df_history = df_history.set_index('Date')
-            return df_history
-        if(not ignore_date):
-            start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
-            if(start_date==None):
-                return
-            end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
-            if(end_date==None):
-                return
-            start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
-            end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
-            if(start>end):
-                print('Start date must be a day before end date!')
-                return
-        ticker_no_df = SymbolManager.get_tse_webid(stock)
-        if(type(ticker_no_df)==bool or ticker_no_df is None):
-            # Always return empty DataFrame if not found
-            return pd.DataFrame()
-        df_history = pd.DataFrame({},columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No','Ticker','Name','Market']).set_index('Date')
-        try:
-            for index, row in (ticker_no_df.reset_index()).iterrows():
-                try:
-                    df_temp = get_price_data(ticker_no = row['WebID'],ticker = row['Ticker'],name = row['Name'],market = row['Market'])
-                    df_history = pd.concat([df_history,df_temp])
-                except Exception as e:
-                    pass
-            if df_history.empty:
-                return pd.DataFrame()
-            df_history = df_history.sort_index(ascending=True)
-            df_history = df_history.reset_index()
-            df_history['Weekday']=df_history['Date'].dt.weekday
-            df_history['Weekday'] = df_history['Weekday'].apply(lambda x: calendar.day_name[x])
-            df_history['J-Date']=df_history['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
-            df_history = df_history.set_index('J-Date')
-            df_history=df_history[['Date','Weekday','Y-Final','Open','High','Low','Close','Final','Volume','Value','No','Ticker','Name','Market']]
-            cols = ['Y-Final','Open','High','Low','Close','Final','Volume','No','Value']
-            df_history[cols] = df_history[cols].apply(pd.to_numeric, axis=1)
-            df_history['Final(+1)'] = df_history['Final'].shift(+1)          
-            df_history['Market(+1)'] = df_history['Market'].shift(+1)        
-            df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
-                                                  else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
-                                                  else x['Final(+1)']),axis = 1)
-            df_history['Y-Final'] = df_history['temp']
-            df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
-            for col in cols:
-                df_history[col] = df_history[col].apply(lambda x: int(x))
-            if(adjust_price):
-                df_history['COEF'] = (df_history['Y-Final'].shift(-1)/df_history['Final']).fillna(1.0)
-                df_history['ADJ-COEF']=df_history.iloc[::-1]['COEF'].cumprod().iloc[::-1]
-                df_history['Adj Open'] = (df_history['Open']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-                df_history['Adj High'] = (df_history['High']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-                df_history['Adj Low'] = (df_history['Low']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-                df_history['Adj Close'] = (df_history['Close']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-                df_history['Adj Final'] = (df_history['Final']*df_history['ADJ-COEF']).apply(lambda x: int(x))
-                df_history.drop(columns=['COEF','ADJ-COEF'],inplace=True)
-            if(not show_weekday):
-                df_history.drop(columns=['Weekday'],inplace=True)
-            if(not double_date):
-                df_history.drop(columns=['Date'],inplace=True)
-            df_history.drop(columns=['Y-Final'],inplace=True)
-            if(not ignore_date):
-                df_history = df_history[start_date:end_date]
-            return df_history
-        except Exception as e:
-            # On any error, return empty DataFrame
-            return pd.DataFrame()
-
-<<<<<<< HEAD
-    @staticmethod
-    async def get_price_history_async(stocks, start_date='1400-01-01', end_date='1401-01-01'):
-        """
-        دریافت داده قیمت چند نماد به صورت موازی و سریع‌تر با aiohttp
-        """
-        import pandas as pd
-        import jdatetime
-        import calendar
-        async def fetch_price(session, ticker_no, ticker, name, market):
-            url = f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{ticker_no}/0'
-            async with session.get(url, headers=HEADERS) as resp:
-                data = await resp.json()
-                df_history = pd.DataFrame(data['closingPriceDaily'])
-                df_history = df_history[['dEven','priceMax','priceMin','pClosing','pDrCotVal','priceFirst','priceYesterday','qTotCap','qTotTran5J','zTotTran']]
-                df_history.columns = ['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
-                df_history['Date'] = df_history['Date'].apply(lambda x: str(x))
-                df_history['Date'] = df_history['Date'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[-2:]}')
-                df_history['Date']=pd.to_datetime(df_history['Date'])
-                df_history = df_history[df_history['No']!=0]
-                df_history['Ticker'] = ticker
-                df_history['Name'] = name
-                df_history['Market'] = market
-                df_history = df_history.set_index('Date')
-                return df_history
-
-        results = []
-        async with aiohttp.ClientSession() as session:
-            tasks = []
-            for stock in stocks:
-                ticker_no_df = SymbolManager.get_tse_webid(stock)
-                if ticker_no_df is not None:
-                    for _, row in ticker_no_df.iterrows():
-                        tasks.append(fetch_price(session, row['WebID'], row['Ticker'], row['Name'], row['Market']))
-            fetched = await asyncio.gather(*tasks, return_exceptions=True)
-            for df in fetched:
-                if isinstance(df, pd.DataFrame):
-                    results.append(df)
-        if results:
-            return pd.concat(results)
-        return pd.DataFrame()
-=======
-    def __init__(self):
-        self.headers = HEADERS
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
-
-
-class USDManager:
-    @staticmethod
-<<<<<<< HEAD
-    def get_usd_irr_prices():
-        """
-        Fetches historical USD/IRR prices from tgju.org API.
-        Returns DataFrame with usd_price and irr_price columns.
-        """
-        try:
-            # Fetch data from tgju.org API
-            url = "https://api.tgju.org/v1/market/price-history/dollar_rl"
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            resp = requests.get(url, headers=headers, timeout=10)
-
-            if resp.status_code != 200:
-                print("[USDManager] Error fetching data from tgju.org")
-                return pd.DataFrame()
-
-            data = resp.json()
-            if not data or 'data' not in data:
-                print("[USDManager] No data found in response")
-                return pd.DataFrame()
-
-            # Process the data
-            records = []
-            for item in data['data']:
-                try:
-                    # Convert timestamp to Jalali date
-                    timestamp = item.get('created_at', {}).get('timestamp', 0)
-                    if timestamp:
-                        gregorian_date = datetime.datetime.fromtimestamp(timestamp)
-                        jalali_date = jdatetime.date.fromgregorian(date=gregorian_date.date())
-                        date_str = str(jalali_date)
-                    else:
-                        continue
-
-                    # Extract prices
-                    usd_price = item.get('price', 0)
-                    if usd_price:
-                        records.append({
-                            'Date': date_str,
-                            'usd_price': float(usd_price),
-                            'irr_price': float(usd_price)  # IRR price is same as USD in this context
-                        })
-
-                except Exception as e:
-                    continue
-
-            if records:
-                df = pd.DataFrame(records)
-                df = df.sort_values('Date').reset_index(drop=True)
-                return df
-            else:
-                return pd.DataFrame()
-
-        except Exception as e:
-            print(f"[USDManager] Error fetching USD/IRR prices: {e}")
-            return pd.DataFrame()
-=======
-    def fetch_usd_irr_history(start_date='1395-01-01', end_date='1400-12-29', ignore_date=False, show_weekday=False, double_date=False):
-        """
-        Fetches historical USD/IRR rates between start_date and end_date.
-        """
-        # Example implementation (replace with actual logic as needed)
-        # This is a placeholder for the actual USD/IRR fetching logic
-        # You should move the real code from fetch_usd_irr.py or similar here
-        import requests
-        import pandas as pd
-        import jdatetime
-        import calendar
-        # Example: Fetch from a hypothetical API or local file
-        # url = 'https://api.exchangerate.host/timeseries?start_date=...&end_date=...&base=USD&symbols=IRR'
-        # r = requests.get(url)
-        # df = pd.DataFrame(r.json()['rates'])
-        # For now, return an empty DataFrame
-        return pd.DataFrame()
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
-
-    @staticmethod
-    def get_latest_usd_irr():
-        """
-<<<<<<< HEAD
-        Returns the latest USD/IRR exchange rate from tgju.org API.
-        Returns a dict with 'date' and 'price' keys, or None if fetch fails.
-        """
-        try:
-            url = "https://api.tgju.org/v1/market/price-history/dollar_rl"
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            resp = requests.get(url, headers=headers, timeout=10)
-            
-            if resp.status_code != 200:
-                logger.warning(f"[USDManager] API returned status code {resp.status_code}")
-                return None
-            
-            data = resp.json()
-            if not data or 'data' not in data or len(data['data']) == 0:
-                logger.warning("[USDManager] No data found in API response")
-                return None
-            
-            latest_item = data['data'][0]
-            timestamp = latest_item.get('created_at', {}).get('timestamp', 0)
-            price = latest_item.get('price', 0)
-            
-            if timestamp and price:
-                gregorian_date = datetime.datetime.fromtimestamp(timestamp)
-                jalali_date = jdatetime.date.fromgregorian(date=gregorian_date.date())
-                logger.info(f"[USDManager] Successfully fetched latest USD/IRR: {price}")
-                return {
-                    'date': str(jalali_date),
-                    'price': float(price)
-                }
-            logger.warning("[USDManager] Invalid data in API response")
-            return None
-            
-        except requests.exceptions.Timeout:
-            logger.error("[USDManager] API request timed out")
-            return None
-        except requests.exceptions.ConnectionError as e:
-            logger.error(f"[USDManager] Connection error: {e}")
-            return None
-        except Exception as e:
-            logger.exception(f"[USDManager] Unexpected error fetching latest USD/IRR: {e}")
-            return None
-=======
-        Returns the latest USD/IRR exchange rate.
-        """
-        # Example placeholder logic
-        # Replace with actual code to fetch the latest rate
-        return None
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
-
-
-
-
-<<<<<<< HEAD
-class Get_RI_History:
-    @staticmethod
-    def get_ri_history(stock: str) -> pd.DataFrame:
-        """
-        Fetches Real (Individual) and Institutional trading data for a stock.
-        Returns DataFrame with RI data including buy/sell volumes and values.
-        """
-        try:
-            ticker_no_df = SymbolManager.get_tse_webid(stock)
-            if ticker_no_df is None or ticker_no_df.empty:
-                logger.warning(f"Symbol '{stock}' not found")
-                raise SymbolNotFoundException(f"Symbol '{stock}' not found in TSE market")
-            
-            # Extract WebID from the DataFrame
-            web_id = ticker_no_df.iloc[0]['WebID']
-            ticker = ticker_no_df.iloc[0]['Ticker']
-            
-            # Fetch RI history from TSE API
-            url = f"https://service.tsetmc.com/tsev2/api/PersonalInvesting/{web_id}"
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            
-            resp = requests.get(url, headers=headers, timeout=10)
-            
-            if resp.status_code != 200:
-                logger.error(f"Failed to fetch RI data for {stock} (status: {resp.status_code})")
-                raise APIException(f"Failed to fetch RI data for {stock}")
-            
-            data = resp.json()
-            if not data or 'ridata' not in data:
-                logger.warning(f"No RI data found for {stock}")
-                return pd.DataFrame()
-            
-            records = []
-            for item in data.get('ridata', []):
-                try:
-                    # Convert date format if needed
-                    date_str = item.get('dEven', '')
-                    if date_str:
-                        records.append({
-                            'Date': date_str,
-                            'No Buy Real': item.get('nBuyI', 0),
-                            'No Sell Real': item.get('nSellI', 0),
-                            'Vol Buy Real': item.get('vBuyI', 0),
-                            'Vol Sell Real': item.get('vSellI', 0),
-                            'Val Buy Real': item.get('qBuyI', 0),
-                            'Val Sell Real': item.get('qSellI', 0),
-                            'No Buy Inst': item.get('nBuyL', 0),
-                            'No Sell Inst': item.get('nSellL', 0),
-                            'Vol Buy Inst': item.get('vBuyL', 0),
-                            'Vol Sell Inst': item.get('vSellL', 0),
-                            'Val Buy Inst': item.get('qBuyL', 0),
-                            'Val Sell Inst': item.get('qSellL', 0)
-                        })
-                except Exception as e:
-                    logger.debug(f"Error processing RI data item: {e}")
-                    continue
-            
-            if records:
-                df = pd.DataFrame(records)
-                logger.info(f"Successfully fetched {len(records)} RI records for {stock}")
-                return df
-            else:
-                logger.warning(f"No valid RI records found for {stock}")
-                return pd.DataFrame()
-        
-        except SymbolNotFoundException as e:
-            logger.error(f"Symbol not found: {e}")
-            return pd.DataFrame()
-        except APIException as e:
-            logger.error(f"API error: {e}")
-            return pd.DataFrame()
-        except requests.exceptions.Timeout:
-            logger.error(f"Timeout fetching RI data for {stock}")
-            return pd.DataFrame()
-        except Exception as e:
-            logger.exception(f"Unexpected error fetching RI history for {stock}: {e}")
-            return pd.DataFrame()
-
-
-class Get_ShareHoldersInfo:
-    @staticmethod
-    def get_shareholders_info(stock: str) -> pd.DataFrame:
-        """
-        Fetches shareholders information for a stock from TSE API.
-        Returns DataFrame with shareholder data including holdings and percentages.
-        """
-        try:
-            ticker_no_df = SymbolManager.get_tse_webid(stock)
-            if ticker_no_df is None or ticker_no_df.empty:
-                logger.warning(f"Symbol '{stock}' not found")
-                raise SymbolNotFoundException(f"Symbol '{stock}' not found in TSE market")
-            
-            # Extract WebID from the DataFrame
-            web_id = ticker_no_df.iloc[0]['WebID']
-            ticker = ticker_no_df.iloc[0]['Ticker']
-            
-            # Fetch shareholders info from TSE API
-            url = f"https://service.tsetmc.com/tsev2/api/ShareHolder/{web_id}"
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            
-            resp = requests.get(url, headers=headers, timeout=10)
-            
-            if resp.status_code != 200:
-                logger.error(f"Failed to fetch shareholder data for {stock} (status: {resp.status_code})")
-                raise APIException(f"Failed to fetch shareholder data for {stock}")
-            
-            data = resp.json()
-            if not data or 'shareholder' not in data:
-                logger.warning(f"No shareholder data found for {stock}")
-                return pd.DataFrame()
-            
-            records = []
-            for item in data.get('shareholder', []):
-                try:
-                    records.append({
-                        'Date': item.get('dEven', ''),
-                        'Holder Name': item.get('lName', ''),
-                        'Shares': item.get('cEPS', 0),
-                        'Shares Percent': item.get('per', 0),
-                        'Holder Type': item.get('sGoal', ''),
-                        'National ID': item.get('cIsin', ''),
-                        'Change Percent': item.get('perChange', 0)
-                    })
-                except Exception as e:
-                    logger.debug(f"Error processing shareholder data item: {e}")
-                    continue
-            
-            if records:
-                df = pd.DataFrame(records)
-                logger.info(f"Successfully fetched {len(records)} shareholder records for {stock}")
-                return df
-            else:
-                logger.warning(f"No valid shareholder records found for {stock}")
-                return pd.DataFrame()
-        
-        except SymbolNotFoundException as e:
-            logger.error(f"Symbol not found: {e}")
-            return pd.DataFrame()
-        except APIException as e:
-            logger.error(f"API error: {e}")
-            return pd.DataFrame()
-        except requests.exceptions.Timeout:
-            logger.error(f"Timeout fetching shareholder data for {stock}")
-            return pd.DataFrame()
-        except Exception as e:
-            logger.exception(f"Unexpected error fetching shareholder info for {stock}: {e}")
-            return pd.DataFrame()
-
-
-class GravityTSEManager:
-    @staticmethod
-    def __Check_JDate_Validity__(date_str, key_word="'DATE'"):
-        """
-        Validates and returns a Jalali date string in YYYY-MM-DD format.
-        """
-        try:
-            parts = date_str.split('-')
-            if len(parts) != 3:
-                raise ValueError
-            year, month, day = map(int, parts)
-            # Validate Jalali date
-            jdatetime.date(year, month, day)
-            return date_str
-        except Exception:
-            print(f'Invalid {key_word} date format: {date_str}. Expected YYYY-MM-DD.')
-            return None
-=======
-class GravityTSEManager:
-
-    @staticmethod
-    def get_ri_history(stock: str = 'خودرو',
-                       start_date: str = '1400-01-01',
-                       end_date: str = '1401-01-01',
-                       ignore_date: bool = False,
-                       show_weekday: bool = False,
-                       double_date: bool = False) -> pd.DataFrame:
-        # Takes ticker or firm's full name and returns a Pandas dataframe with RI history.
-        df_RI_tab=df_RI_tab[['Date','Weekday','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I',
-                             'Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I','Ticker','Name','Market']]
-        cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
-        df_RI_tab[cols] = df_RI_tab[cols].apply(pd.to_numeric, axis=1)
-        if(not show_weekday):
-            df_RI_tab.drop(columns=['Weekday'],inplace=True)
-        if(not double_date):
-            df_RI_tab.drop(columns=['Date'],inplace=True)
-        if(not ignore_date):
-            df_RI_tab = df_RI_tab[start_date:end_date]
-        return df_RI_tab
-
-    @staticmethod
-    def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='1401-01-01', ignore_date = False, show_weekday = False, double_date = False, alt = False):
-        # Returns DataFrame of RI history for the given date range.
-        def get_ri_data(ticker_no,ticker,name, data_part):
-            if(alt):
-                r = requests.get(f'https://cdn.tsetmc.com/api/ClientType/GetClientTypeHistory/{ticker_no}', headers=HEADERS)
-                df_RI_tab = pd.DataFrame(r.json()['clientType'])
-                cols = ['Date','WebID','Vol_Buy_R','Vol_Buy_I','Val_Buy_R','Val_Buy_I','No_Buy_I','Vol_Sell_R','No_Buy_R','Vol_Sell_I','Val_Sell_R','Val_Sell_I','No_Sell_I','No_Sell_R']
-                df_RI_tab.columns = cols
-                df_RI_tab = df_RI_tab[['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']]
-                df_RI_tab['Date'] = df_RI_tab['Date'].apply(lambda x: str(x))
-                cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
-                df_RI_tab[cols] = df_RI_tab[cols].astype('int64')
-            else:
-                r = requests.get(f'http://www.tsetmc.com/tsev2/data/clienttype.aspx?i={ticker_no}', headers=HEADERS)
-                df_RI_tab=pd.DataFrame(r.text.split(';'))
-                columns=['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
-                df_RI_tab[columns] = df_RI_tab[0].str.split(",",expand=True)
-                df_RI_tab.drop(columns=[0],inplace=True)
-            df_RI_tab['Date']=pd.to_datetime(df_RI_tab['Date'])
-            df_RI_tab['Ticker'] = ticker
-            df_RI_tab['Name'] = name
-            df_RI_tab['Market'] = data_part
-            return df_RI_tab
-        if(not ignore_date):
-            start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
-            if(start_date==None):
-                return
-            end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
-            if(end_date==None):
-                return
-            start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
-            end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
-            if(start>end):
-                print('Start date must be a day before end date!')
-                return
-        ticker_no_df = SymbolManager.get_tse_webid(stock)
-        if(type(ticker_no_df)==bool):
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+################################################################################################################################################################################
+################################################################################################################################################################################
+def __Check_JDate_Validity__(date, key_word):
+    try:
+        if(len(date.split('-')[0])==4):
+            date = jdatetime.date(year=int(date.split('-')[0]), month=int(date.split('-')[1]), day=int(date.split('-')[2]))
+            date = f'{date.year:04}-{date.month:02}-{date.day:02}'
+            return date
+        else:
+            print(f'Please enter valid {key_word} date in YYYY-MM-DD format')
+    except:
+        if(len(date)==10):
+            print(f'Please enter valid {key_word} date')
             return
-        df_RI_tab = pd.DataFrame({},columns=['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R',
-                                             'Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I','Ticker','Name','Market']).set_index('Date')
-        for index, row in (ticker_no_df.reset_index()).iterrows():
-            try:
-                df_temp = get_ri_data(ticker_no = row['WebID'], ticker = row['Ticker'], name = row['Name'], data_part = row['Market'])
-                df_RI_tab = pd.concat([df_RI_tab,df_temp])
-            except:
-                pass
-        df_RI_tab = df_RI_tab.sort_index(ascending=True)
-        df_RI_tab = df_RI_tab.reset_index()
-        df_RI_tab['Weekday']=df_RI_tab['Date'].dt.weekday
-        df_RI_tab['Weekday'] = df_RI_tab['Weekday'].apply(lambda x: calendar.day_name[x])
-        df_RI_tab['J-Date']=df_RI_tab['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
-        df_RI_tab.set_index(df_RI_tab['J-Date'],inplace = True)
-        df_RI_tab = df_RI_tab.set_index('J-Date')
-        df_RI_tab=df_RI_tab[['Date','Weekday','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I',
-                             'Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I','Ticker','Name','Market']]
-        cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
-        df_RI_tab[cols] = df_RI_tab[cols].apply(pd.to_numeric, axis=1)
-        if(not show_weekday):
-            df_RI_tab.drop(columns=['Weekday'],inplace=True)
-        if(not double_date):
-            df_RI_tab.drop(columns=['Date'],inplace=True)
-        if(not ignore_date):
-            df_RI_tab = df_RI_tab[start_date:end_date]
-        return df_RI_tab
+        else:
+            print(f'Please enter valid {key_word} date in YYYY-MM-DD format')
+            
+################################################################################################################################################################################
+################################################################################################################################################################################
+def get_tse_webid(stock:str = 'پترول') -> pd.DataFrame:
+    """
+    Takes ticker or firm's full name, does a live search in TSE new website and returns a multi-index Pandas dataframe that contains the following columns:
+    
+    Ticker: Symbol in the Tehran Stock Exchange.
+    Active: 1 shows the market in which the stock is currently trading. 
+    Name: firm's full name in the relevant market.
+    WebID: A numeric code that can be used for building request links and crawling the financial data of the given stock.
+    Market: Market name in Tehran Stock Exchange, markets the stock was traded in and is trading now (بورس، فرابورس، پایه زرد، پایه نارنجی، پایه قرمز).
+    
+    :param stock: (str) Ticker or firm's full name. 
+    :return: (pd.DataFrame) A dataframe that contains Ticker, Active, WebID, Name and Market columns for the requested stock.
+    """
+    
+    # basic search function: searches for and cleans the search results
+    def srch_req(srch_key):
+        client = BaseSyncClient()
+        try:
+            resp = client._make_request(f'https://cdn.tsetmc.com/api/Instrument/GetInstrumentSearch/{srch_key}')
+            srch_res = pd.DataFrame(resp.json()['instrumentSearch'])
+        except TSEConnectionError:
+            return pd.DataFrame([], columns=['Name','WebID','NameSplit','SymbolSplit','Market'])
+        srch_res = srch_res[['lVal18AFC','lVal30','insCode','lastDate','cgrValCot']]
+        srch_res.columns = ['Ticker','Name','WebID','Active','Market']
+        srch_res['Name'] = srch_res['Name'].apply(lambda x : characters.ar_to_fa(' '.join([i.strip() for i in x.split('\u200c')]).strip()))
+        srch_res['Ticker'] = srch_res['Ticker'].apply(lambda x : characters.ar_to_fa(''.join(x.split('\u200c')).strip()))
+        srch_res['NameSplit'] = srch_res['Name'].apply(lambda x : ''.join(x.split()).strip())
+        srch_res['SymbolSplit'] = srch_res['Ticker'].apply(lambda x : ''.join(x.split()).strip())
+        srch_res['Active'] = pd.to_numeric(srch_res['Active'])
+        srch_res = srch_res.sort_values('Ticker')
+        srch_res = pd.DataFrame(srch_res[['Name','WebID','NameSplit','SymbolSplit','Market']].values, columns=['Name','WebID',
+                                'NameSplit','SymbolSplit','Market'], index=pd.MultiIndex.from_frame(srch_res[['Ticker','Active']]))
+        return srch_res
+    
+    # checking function inputs
+    if type(stock) != str:
+        print('Please Enetr a Valid Ticker or Name!')
+        return False
+    
+    # special case that can not be found using ticker: convert ticker to full name!
+    if(stock=='آ س پ'):
+        stock = 'آ.س.پ'
+        
+    # generating search keys
+    stock = characters.ar_to_fa(''.join(stock.split('\u200c')).strip())
+    first_name = stock.split()[0]
+    stock = ''.join(stock.split())
+    
+    # start searching using keys, cleaning data, checking search results and handling special cases (ticker or full name)
+    data = srch_req(first_name)
+    df_symbol = data[data['SymbolSplit'] == stock]
+    df_name = data[data['NameSplit'] == stock]
+    
+    # matching search results with search key, cleaning the data and adding market data  
+    if len(df_symbol) > 0 :
+        df_symbol = df_symbol.sort_index(level=1,ascending=False).drop(['NameSplit','SymbolSplit'], axis=1)
+        df_symbol['Market'] = df_symbol['Market'].apply(lambda x: re.sub('[0-9]', '', x))
+        df_symbol['Market'] = df_symbol['Market'].map({'N':'بورس', 'Z':'فرابورس', 'D':'فرابورس', 'A':'پایه زرد', 'P':'پایه زرد', 'C':'پایه نارنجی', 'L':'پایه قرمز',
+                                                       'W':'کوچک و متوسط فرابورس', 'V':'کوچک و متوسط فرابورس',})
+        df_symbol['Market'] = df_symbol['Market'].fillna('نامعلوم')
+        return df_symbol
+    elif len(df_name) > 0 :
+        symbol = df_name.index[0][0]
+        data = srch_req(symbol)
+        symbol = characters.ar_to_fa(''.join(symbol.split('\u200c')).strip())
+        df_symbol = data[data.index.get_level_values('Ticker') == symbol]
+        if len(df_symbol) > 0 :
+            df_symbol = df_symbol.sort_index(level=1, ascending=False).drop(['NameSplit','SymbolSplit'], axis=1)
+            df_symbol['Market'] = df_symbol['Market'].apply(lambda x: re.sub('[0-9]', '', x))
+            df_symbol['Market'] = df_symbol['Market'].map({'N':'بورس', 'Z':'فرابورس', 'D':'فرابورس', 'A':'پایه زرد', 'P':'پایه زرد', 'C':'پایه نارنجی', 'L':'پایه قرمز',
+                                                           'W':'کوچک و متوسط فرابورس', 'V':'کوچک و متوسط فرابورس',})
+            df_symbol['Market'] = df_symbol['Market'].fillna('نامعلوم')
+            return df_symbol
+    
+    # invalid entry
+    print('Please Enetr a Valid Ticker or Name!')
+    
+    return False
 
-        # Removed incomplete and mis-indented static method definition for get_price_history.
+
+def __Get_TSE_WebID__(stock):
+    # search TSE function ------------------------------------------------------------------------------------------------------------
+    def request(name):
+        page = requests.get(f'https://old.tsetmc.com/tsev2/data/search.aspx?skey={name}', headers=headers)
+        data = []
+        for i in page.text.split(';') :
+            try :
+                i = i.split(',')
+                data.append([i[0],i[1],i[2],i[7],i[-1]])
+            except :
+                pass
+        data = pd.DataFrame(data, columns=['Ticker','Name','WEB-ID','Active','Market'])
+        data['Name'] = data['Name'].apply(lambda x : characters.ar_to_fa(' '.join([i.strip() for i in x.split('\u200c')]).strip()))
+        data['Ticker'] = data['Ticker'].apply(lambda x : characters.ar_to_fa(''.join(x.split('\u200c')).strip()))
+        data['Name-Split'] = data['Name'].apply(lambda x : ''.join(x.split()).strip())
+        data['Symbol-Split'] = data['Ticker'].apply(lambda x : ''.join(x.split()).strip())
+        data['Active'] = pd.to_numeric(data['Active'])
+        data = data.sort_values('Ticker')
+        data = pd.DataFrame(data[['Name','WEB-ID','Name-Split','Symbol-Split','Market']].values, columns=['Name','WEB-ID',
+                            'Name-Split','Symbol-Split','Market'], index=pd.MultiIndex.from_frame(data[['Ticker','Active']]))
+        return data
+    #---------------------------------------------------------------------------------------------------------------------------------
+    if type(stock) != str:
+        print('Please Enetr a Valid Ticker or Name!')
+        return False
+    if(stock=='آ س پ'):
+        stock = 'آ.س.پ'
+    # cleaning input search key
+    stock = characters.ar_to_fa(''.join(stock.split('\u200c')).strip())
+    first_name = stock.split()[0]
+    if(stock=='فن آوا'):
+        first_name = stock
+    stock = ''.join(stock.split())
+    # search TSE and process:
+    data = request(first_name)
+    df_symbol = data[data['Symbol-Split'] == stock]
+    df_name = data[data['Name-Split'] == stock]
+    if len(df_symbol) > 0 :
+        df_symbol = df_symbol.sort_index(level=1,ascending=False).drop(['Name-Split','Symbol-Split'], axis=1)
+        df_symbol['Market'] = df_symbol['Market'].apply(lambda x: re.sub('[0-9]', '', x))
+        df_symbol['Market'] = df_symbol['Market'].map({'N':'بورس', 'Z':'فرابورس', 'D':'فرابورس', 'A':'پایه زرد', 'P':'پایه زرد', 'C':'پایه نارنجی', 'L':'پایه قرمز',
+                                                       'W':'کوچک و متوسط فرابورس', 'V':'کوچک و متوسط فرابورس',})
+        df_symbol['Market'] = df_symbol['Market'].fillna('نامعلوم')
+        return df_symbol
+    elif len(df_name) > 0 :
+        symbol = df_name.index[0][0]
+        data = request(symbol)
+        symbol = characters.ar_to_fa(''.join(symbol.split('\u200c')).strip())
+        df_symbol = data[data.index.get_level_values('Ticker') == symbol]
+        if len(df_symbol) > 0 :
+            df_symbol = df_symbol.sort_index(level=1,ascending=False).drop(['Name-Split','Symbol-Split'], axis=1)
+            df_symbol['Market'] = df_symbol['Market'].apply(lambda x: re.sub('[0-9]', '', x))
+            df_symbol['Market'] = df_symbol['Market'].map({'N':'بورس', 'Z':'فرابورس', 'D':'فرابورس', 'A':'پایه زرد', 'P':'پایه زرد', 'C':'پایه نارنجی', 'L':'پایه قرمز',
+                                                           'W':'کوچک و متوسط فرابورس', 'V':'کوچک و متوسط فرابورس',})
+            df_symbol['Market'] = df_symbol['Market'].fillna('نامعلوم')
+            return df_symbol
+    print('Please Enetr a Valid Ticker or Name!')
+    return False
+################################################################################################################################################################################
+################################################################################################################################################################################
+
+def __Get_TSE_Sector_WebID__(sector_name):
+    sector_list = ['زراعت','ذغال سنگ','کانی فلزی','سایر معادن','منسوجات','محصولات چرمی','محصولات چوبی','محصولات کاغذی','انتشار و چاپ','فرآورده های نفتی','لاستیک',\
+                   'فلزات اساسی','محصولات فلزی','ماشین آلات','دستگاه های برقی','وسایل ارتباطی','خودرو','قند و شکر','چند رشته ای','تامین آب، برق و گاز','غذایی',\
+                   'دارویی','شیمیایی','خرده فروشی','کاشی و سرامیک','سیمان','کانی غیر فلزی','سرمایه گذاری','بانک','سایر مالی','حمل و نقل',\
+                   'رادیویی','مالی','اداره بازارهای مالی','انبوه سازی','رایانه','اطلاعات و ارتباطات','فنی مهندسی','استخراج نفت','بیمه و بازنشستگی']
+    sector_web_id = [34408080767216529,19219679288446732,13235969998952202,62691002126902464,59288237226302898,69306841376553334,58440550086834602,30106839080444358,25766336681098389,\
+     12331083953323969,36469751685735891,32453344048876642,1123534346391630,11451389074113298,33878047680249697,24733701189547084,20213770409093165,21948907150049163,40355846462826897,\
+     54843635503648458,15508900928481581,3615666621538524,33626672012415176,65986638607018835,57616105980228781,70077233737515808,14651627750314021,34295935482222451,72002976013856737,\
+     25163959460949732,24187097921483699,41867092385281437,61247168213690670,61985386521682984,4654922806626448,8900726085939949,18780171241610744,47233872677452574,65675836323214668,\
+     59105676994811497]
+    df_index_lookup = pd.DataFrame({'Sector':sector_list,'Web-ID':sector_web_id}).set_index('Sector')
+
+    """index_list_url = 'https://tsetmc.com/Loader.aspx?Partree=151315&Flow=1'
+    index_list_page = requests.get(index_list_url)
+    soup = BeautifulSoup(index_list_page.content, 'html.parser')
+    list_of_index = (soup.find_all('tbody')[0]).find_all('a')
+    index_title = []
+    index_webid = []
+    for i in range(len(list_of_index)):
+        index_title.append(list_of_index[i].text)
+        index_webid.append(list_of_index[i].get('href').split('=')[-1])
+    df_index_lookup = pd.DataFrame({'Sector':index_title,'Web-ID':index_webid}) 
+    # Filter the lookup table to keep just industries
+    df_index_lookup = df_index_lookup.iloc[:44]
+    df_index_lookup.drop([16,18,19,26], axis=0, inplace=True)
+    df_index_lookup['Sector'] = df_index_lookup['Sector'].apply(lambda x: (''.join([i for i in x if not i.isdigit()]).replace('-','')))
+    df_index_lookup['Sector'] = df_index_lookup['Sector'].apply(lambda x: (((str(x).replace('ي','ی')).replace('ك','ک')).replace(' ص','')).strip())
+    df_index_lookup = df_index_lookup.set_index('Sector')
+    df_index_lookup['Web-ID'] = df_index_lookup['Web-ID'].apply(lambda x: int(x))"""
+    # try search keyy with available look-up table and find web-id:
+    try:
+        sector_web_id = df_index_lookup.loc[sector_name]['Web-ID']
+    except:
+        sector_name = characters.fa_to_ar(sector_name)
+        page = requests.get(f'https://www.google.com/search?q={sector_name} tsetmc اطلاعات شاخص', headers=headers)
+        code = page.text.split('http://www.tsetmc.com/Loader.aspx%3FParTree%3D15131J%26i%3D')[1]
+        code = code.split('&')[0]
+        # check google acquired code with reference table
+        if(len(df_index_lookup[df_index_lookup['Web-ID'] == int(code)]) == 1):
+            sector_web_id = int(code)
+        else:
+            print('Invalid sector name! Please try again with correct sector name!')
+            return
+    return sector_web_id   
+
+################################################################################################################################################################################
+################################################################################################################################################################################
+def get_price_history(stock:str = 'خودرو', 
+                      start_date:str = '1400-01-01', 
+                      end_date:str = '1401-01-01', 
+                      ignore_date:bool = False, 
+                      adjust_price:bool = False, 
+                      show_weekday:bool = False, 
+                      double_date:bool = False) -> pd.DataFrame:
+    
+    """
+    Takes ticker or firm's full name and returns a Pandas dataframe that contains the following columns:
+    
+    J-Date: Jalali date, as index
+    Date: Gregorian date
+    Weekday: Name of weekdays
+    Open: Opening price of day
+    High: Maximum price of day 
+    Low: Minimum price of day
+    Close: Closing price of day (آخرین قیمت)
+    Final: Weighted closing price of day (قیمت پایانی)
+    Volume: Traded volume of day
+    Value: Traded value of day in IRAN's Rial
+    No: Number of trades in a day
+    Ticker: Ticker/Symbol
+    Name: Firm's full name
+    Market: Market, the stock is traded in
+    Adj Open: Adjusted opening price of day for stock-splits and dividends
+    Adj High: Adjusted maximum price of day for stock-splits and dividends
+    Adj Low: Adjusted minimum price of day for stock-splits and dividends
+    Adj Close: Adjusted closing price of day for stock-splits and dividends
+    Adj Final: Adjusted weighted closing price of day for stock-splits and dividends
+    
+     * All data are taken from the new website of Tehran Stock Exchange.
+
+    :param stock: (str) Ticker or firm's full name. 
+    :param start_date: (str) Jalali date for starting day of historical price data in YYYY-MM-DD format.
+    :param end_date: (str) Jalali date for ending day of historical price data in YYYY-MM-DD format.
+    :param ignore_date: (bool) Ignores start_date and end_date and returns all available price history, if set to True.
+    :param adjust_price: (bool) Adjusts price for stock-splits and dividends, if set to True.
+    :param show_weekday: (bool) Shows weekdays in the output, if set to True.
+    :param double_date: (bool) Shows Gregorian date in the output, if set to True.
+    :return: (pd.DataFrame) A dataframe that contains J-Date as index and Date, Weekday, Open, High, Low, Close, Final, Volume, Value, No, Ticker, Name, Market, Adj Open, Adj High, Adj Low, Adj Close, Adj Final.
+    """
+
+    # basic request and data cleaning function for historical price data of a ticker for a given market 
+    def get_price_data(ticker_no, ticker, name, market):
+        r = requests.get(f'https://cdn.tsetmc.com/api/ClosingPrice/GetClosingPriceDailyList/{ticker_no}/0', headers=headers)
+        df_history = pd.DataFrame(r.json()['closingPriceDaily'])
+        columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
+        df_history = df_history[['dEven','priceMax','priceMin','pClosing','pDrCotVal','priceFirst','priceYesterday','qTotCap','qTotTran5J','zTotTran']]
+        df_history.columns = ['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
+        df_history['Date'] = df_history['Date'].apply(lambda x: str(x))
+        df_history['Date'] = df_history['Date'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[-2:]}')
+        df_history['Date']=pd.to_datetime(df_history['Date'])
+        df_history = df_history[df_history['No']!=0]
+        df_history['Ticker'] = ticker
+        df_history['Name'] = name
+        df_history['Market'] = market
+        df_history = df_history.set_index('Date')
+        return df_history
+    
+    # check to see if the entry start and end dates are valid or not
+    if(not ignore_date):
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
+        if(start_date==None):
+            return
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        if(end_date==None):
+            return
+        start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
+        end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
+        if(start>end):
+            print('Start date must be a day before end date!')
+            return
+    
+    # search for WebIDs
+    ticker_no_df = get_tse_webid(stock)
+    if(type(ticker_no_df)==bool):
+        return
+    
+    # create an empty dataframe:
+    df_history = pd.DataFrame({},columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No','Ticker','Name','Market']).set_index('Date')
+    
+    # loop to get data from different pages of a ticker:
+    for index, row in (ticker_no_df.reset_index()).iterrows():
+        try:
+            df_temp = get_price_data(ticker_no = row['WebID'],ticker = row['Ticker'],name = row['Name'],market = row['Market'])
+            df_history = pd.concat([df_history,df_temp])
+        except:
+            pass
+        
+    # sort based on dated index:
+    df_history = df_history.sort_index(ascending=True)
+    df_history = df_history.reset_index()
+    
+    # add weekdays and j-date columns:
+    df_history['Weekday']=df_history['Date'].dt.weekday
+    df_history['Weekday'] = df_history['Weekday'].apply(lambda x: calendar.day_name[x])
+    df_history['J-Date']=df_history['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+    df_history = df_history.set_index('J-Date')
+    
+    # rearrange columns and convert some columns to numeric
+    df_history=df_history[['Date','Weekday','Y-Final','Open','High','Low','Close','Final','Volume','Value','No','Ticker','Name','Market']]
+    cols = ['Y-Final','Open','High','Low','Close','Final','Volume','No','Value']
+    df_history[cols] = df_history[cols].apply(pd.to_numeric, axis=1)
+    
+
+    # find stock moves between markets and adjust for nominal price in the new market, if necessary
+    df_history['Final(+1)'] = df_history['Final'].shift(+1)          
+    df_history['Market(+1)'] = df_history['Market'].shift(+1)        
+    df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
+                                          else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
+                                          else x['Final(+1)']),axis = 1)
+    df_history['Y-Final'] = df_history['temp']
+    df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
+    
+    # convert numbers to int because we do not have less than Rial, just for clean outputs!
+    for col in cols:
+        df_history[col] = df_history[col].apply(lambda x: int(x))
+
+    # Adjust price data, if requested:
+    if(adjust_price):
+        df_history['COEF'] = (df_history['Y-Final'].shift(-1)/df_history['Final']).fillna(1.0)
+        df_history['ADJ-COEF']=df_history.iloc[::-1]['COEF'].cumprod().iloc[::-1]
+        df_history['Adj Open'] = (df_history['Open']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj High'] = (df_history['High']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Low'] = (df_history['Low']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Close'] = (df_history['Close']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Final'] = (df_history['Final']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history.drop(columns=['COEF','ADJ-COEF'],inplace=True)
+    
+    # drop weekdays if not requested
+    if(not show_weekday):
+        df_history.drop(columns=['Weekday'],inplace=True)
+    
+    # drop Gregorian date if not requested
+    if(not double_date):
+        df_history.drop(columns=['Date'],inplace=True)
+    
+    # drop yesterday's final price!
+    df_history.drop(columns=['Y-Final'],inplace=True)
+    
+    # slice requested time window, if requested:
+    if(not ignore_date):
+        df_history = df_history[start_date:end_date]
+        
+    return df_history
+
+
+def Get_Price_History(stock = 'خودرو', start_date = '1400-01-01', end_date='1401-01-01', ignore_date = False, adjust_price = False, show_weekday = False, double_date = False):
+    """
+    دریافت سابقه قیمت یک سهم در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه قیمت بدون توجه به تاریخ شروع و پایان
+    قابلیت تعدیل قیمت برای سود نقدی و افزایش سرمایه با احتساب آورده
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    """
+    # a function to get price data from a given page ----------------------------------------------------------------------------------
+    def get_price_data(ticker_no,ticker,name, data_part):
+        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=headers)
+        df_history=pd.DataFrame(r.text.split(';'))
+        columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
+        #split data into defined columns
+        df_history[columns] = df_history[0].str.split("@",expand=True)
+        # drop old column 0
+        df_history.drop(columns=[0],inplace=True)
+        df_history.dropna(inplace=True)
+        df_history['Date']=pd.to_datetime(df_history['Date'])
+        df_history['Ticker'] = ticker
+        df_history['Name'] = name
+        df_history['Market'] = data_part
+        df_history = df_history.set_index('Date')
+        return df_history
+    # ----------------------------------------------------------------------------------------------------------------------------------
+    # check date validity
+    if(not ignore_date):
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
+        if(start_date==None):
+            return
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        if(end_date==None):
+            return
+        start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
+        end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
+        if(start>end):
+            print('Start date must be a day before end date!')
+            return
+    #---------------------------------------------------------------------------------------------------------------------------------------
+    # find web-ids 
+    ticker_no_df = __Get_TSE_WebID__(stock)
+    if(type(ticker_no_df)==bool):
+        return
+    # create an empty dataframe:
+    df_history = pd.DataFrame({},columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No','Ticker','Name','Market']).set_index('Date')
+    # loop to get data from different pages of a ticker:
+    for index, row in (ticker_no_df.reset_index()).iterrows():
+        try:
+            df_temp = get_price_data(ticker_no = row['WEB-ID'],ticker = row['Ticker'],name = row['Name'],data_part = row['Market'])
+            df_history = pd.concat([df_history,df_temp])
+        except:
+            pass
+    # sort index and reverse the order for more processes:
+    df_history = df_history.sort_index(ascending=True)
+    df_history = df_history.reset_index()
+    # determining week days:
+    df_history['Weekday']=df_history['Date'].dt.weekday
+    df_history['Weekday'] = df_history['Weekday'].apply(lambda x: calendar.day_name[x])
+    df_history['J-Date']=df_history['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+    df_history = df_history.set_index('J-Date')
+    # rearrange columns:
+    df_history=df_history[['Date','Weekday','Y-Final','Open','High','Low','Close','Final','Volume','Value','No','Ticker','Name','Market']]
+    cols = ['Y-Final','Open','High','Low','Close','Final','Volume','No','Value']
+    df_history[cols] = df_history[cols].apply(pd.to_numeric, axis=1)
+    #----------------------------------------------------------------------------------------------------------------------
+    # Y-Final for new part of data could be 0 or 1000, we need to replace them with yesterday's final price:
+    df_history['Final(+1)'] = df_history['Final'].shift(+1)          # final prices shifted forward by one day
+    df_history['Market(+1)'] = df_history['Market'].shift(+1)        # market shifted forward by one day
+    df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
+                                          else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
+                                          else x['Final(+1)']),axis = 1)
+    df_history['Y-Final'] = df_history['temp']
+    df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
+    #-----------------------------------------------------------------------------------------------------------------------
+    for col in cols:
+        df_history[col] = df_history[col].apply(lambda x: int(x)) # convert to int because we do not have less than Rial
+    #--------------------------------------------------------------------------------------------------------------------
+    # Adjust price data:
+    if(adjust_price):
+        df_history['COEF'] = (df_history['Y-Final'].shift(-1)/df_history['Final']).fillna(1.0)
+        df_history['ADJ-COEF']=df_history.iloc[::-1]['COEF'].cumprod().iloc[::-1]
+        df_history['Adj Open'] = (df_history['Open']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj High'] = (df_history['High']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Low'] = (df_history['Low']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Close'] = (df_history['Close']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history['Adj Final'] = (df_history['Final']*df_history['ADJ-COEF']).apply(lambda x: int(x))
+        df_history.drop(columns=['COEF','ADJ-COEF'],inplace=True)
+    if(not show_weekday):
+        df_history.drop(columns=['Weekday'],inplace=True)
+    if(not double_date):
+        df_history.drop(columns=['Date'],inplace=True)
+    df_history.drop(columns=['Y-Final'],inplace=True)
+    # slice requested time window:
+    if(not ignore_date):
+        df_history = df_history[start_date:end_date]
+    return df_history
+
+
+################################################################################################################################################################################
+################################################################################################################################################################################
+def get_ri_history(stock:str = 'خودرو', 
+                   start_date:str = '1400-01-01', 
+                   end_date:str = '1401-01-01', 
+                   ignore_date:bool = False, 
+                   show_weekday:bool = False, 
+                   double_date:bool = False) -> pd.DataFrame:
+    
+    """
+    Takes ticker or firm's full name and returns a Pandas dataframe that contains the following columns:
+    
+    J-Date: Jalali date, as index
+    Date: Gregorian date
+    Weekday: Name of weekdays
+    No_Buy_R: Number of buy trades executed by retails 
+    No_Buy_I: Number of buy trades executed by institutionals 
+    No_Sell_R: Number of sell trades executed by retails 
+    No_Sell_I: Number of sell trades executed by institutionals
+    Vol_Buy_R: Total volume are bought by retails
+    Vol_Buy_I: Total volume are bought by institutionals
+    Vol_Sell_R: Total volume are sold by retails
+    Vol_Sell_I: Total volume are sold by institutionals
+    Val_Buy_R: Total value in IRAN's Rial that are bought by retails
+    Val_Buy_I: Total value in IRAN's Rial that are bought by institutionals
+    Val_Sell_R: Total value in IRAN's Rial that are sold by retails
+    Val_Sell_I: Total value in IRAN's Rial that are sold by institutionals
+    Ticker: Ticker/Symbol
+    Name: Firm's full name
+    Market: Market, the stock is traded in
+    
+    * All data are taken from the new website of Tehran Stock Exchange.
+    
+    :param stock: (str) Ticker or firm's full name. 
+    :param start_date: (str) Jalali date for starting day of historical retail-institutional data in YYYY-MM-DD format.
+    :param end_date: (str) Jalali date for ending day of historical retail-institutional data in YYYY-MM-DD format.
+    :param ignore_date: (bool) Ignores start_date and end_date and returns all available retail-institutional history, if set to True.
+    :param show_weekday: (bool) Shows weekdays in the output, if set to True.
+    :param double_date: (bool) Shows Gregorian date in the output, if set to True.
+    :return: (pd.DataFrame) A dataframe that contains J-Date as index and Date, Weekday, No_Buy_R, No_Buy_I, No_Sell_R, No_Sell_I, Vol_Buy_R, Vol_Buy_I, Vol_Sell_R, Vol_Sell_I, Val_Buy_R, Val_Buy_I, Val_Sell_R, Val_Sell_I, Ticker, Name, Market.
+    """
+    
+    # basic request and data cleaning function for historical retail-institutional data of a ticker for a given market:
+    def get_ri_data(ticker_no, ticker, name, market):
+        r = requests.get(f'https://cdn.tsetmc.com/api/ClientType/GetClientTypeHistory/{ticker_no}',headers=headers)
+        df_RI_tab = pd.DataFrame(r.json()['clientType'])
+        cols = ['Date','WebID','Vol_Buy_R','Vol_Buy_I','Val_Buy_R','Val_Buy_I','No_Buy_I','Vol_Sell_R','No_Buy_R','Vol_Sell_I','Val_Sell_R','Val_Sell_I','No_Sell_I','No_Sell_R']
+        df_RI_tab.columns = cols
+        df_RI_tab = df_RI_tab[['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']]
+        df_RI_tab['Date'] = df_RI_tab['Date'].apply(lambda x: str(x))
+        cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
+        df_RI_tab[cols] = df_RI_tab[cols].astype('int64')
+        df_RI_tab['Date']=pd.to_datetime(df_RI_tab['Date'])
+        df_RI_tab['Ticker'] = ticker
+        df_RI_tab['Name'] = name
+        df_RI_tab['Market'] = market
+        df_RI_tab = df_RI_tab.set_index('Date')
+        return df_RI_tab
+    
+    # check to see if the entry start and end dates are valid or not:
+    if(not ignore_date):
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
+        if(start_date==None):
+            return
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        if(end_date==None):
+            return
+        start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
+        end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
         if(start>end):
             print('Start date must be a day before end date!')
             return
 
+    # search for WebIDs:
+    ticker_no_df = get_tse_webid(stock)
+    if(type(ticker_no_df)==bool):
+        return
+    
+    # create an empty dataframe:   
+    df_RI_tab = pd.DataFrame({},columns=['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R',
+                                         'Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I','Ticker','Name','Market']).set_index('Date')
+   
+    # loop to get data from different pages of a ticker:
+    for index, row in (ticker_no_df.reset_index()).iterrows():
+        try:
+            df_temp = get_ri_data(ticker_no = row['WebID'], ticker = row['Ticker'], name = row['Name'], market = row['Market'])
+            df_RI_tab = pd.concat([df_RI_tab,df_temp])
+        except:
+            pass
+        
+    # sort date index 
+    df_RI_tab = df_RI_tab.sort_index(ascending=True)
+    df_RI_tab = df_RI_tab.reset_index()
+    
+    # add weekdays and Jalali date:
+    df_RI_tab['Weekday']=df_RI_tab['Date'].dt.weekday
+    df_RI_tab['Weekday'] = df_RI_tab['Weekday'].apply(lambda x: calendar.day_name[x])
+    df_RI_tab['J-Date']=df_RI_tab['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+    df_RI_tab.set_index(df_RI_tab['J-Date'],inplace = True)
+    df_RI_tab = df_RI_tab.set_index('J-Date')
+    
+    # rearrange columns and convert some columns to numeric:
+    df_RI_tab=df_RI_tab[['Date','Weekday','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I',
+                         'Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I','Ticker','Name','Market']]
+    cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
+    df_RI_tab[cols] = df_RI_tab[cols].apply(pd.to_numeric, axis=1)
+    
+    # drop weekdays if not requested:
+    if(not show_weekday):
+        df_RI_tab.drop(columns=['Weekday'],inplace=True)
+        
+    # drop Gregorian date if not requested:
+    if(not double_date):
+        df_RI_tab.drop(columns=['Date'],inplace=True)
+        
+    # # slice requested time window, if requested:
+    if(not ignore_date):
+        df_RI_tab = df_RI_tab[start_date:end_date]
+        
+    return df_RI_tab
 
 
 def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='1401-01-01', ignore_date = False, show_weekday = False, double_date = False, alt = False):
-    # Returns DataFrame of RI history for the given date range.
+    """
+    دریافت سابقه اطلاعات حقیقی-حقوقی یک سهم در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه حقیقی-حقوقی بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    """
     # a function to get ri data from a given page ----------------------------------------------------------------------------------
     def get_ri_data(ticker_no,ticker,name, data_part):
         if(alt):
-            r = requests.get(f'https://cdn.tsetmc.com/api/ClientType/GetClientTypeHistory/{ticker_no}', headers=HEADERS)
+            r = requests.get(f'https://cdn.tsetmc.com/api/ClientType/GetClientTypeHistory/{ticker_no}',headers=headers)
             df_RI_tab = pd.DataFrame(r.json()['clientType'])
             cols = ['Date','WebID','Vol_Buy_R','Vol_Buy_I','Val_Buy_R','Val_Buy_I','No_Buy_I','Vol_Sell_R','No_Buy_R','Vol_Sell_I','Val_Sell_R','Val_Sell_I','No_Sell_I','No_Sell_R']
             df_RI_tab.columns = cols
@@ -675,7 +630,7 @@ def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='14
             cols = ['No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
             df_RI_tab[cols] = df_RI_tab[cols].astype('int64')
         else:
-            r = requests.get(f'http://www.tsetmc.com/tsev2/data/clienttype.aspx?i={ticker_no}', headers=HEADERS)
+            r = requests.get(f'http://www.tsetmc.com/tsev2/data/clienttype.aspx?i={ticker_no}', headers=headers)
             df_RI_tab=pd.DataFrame(r.text.split(';'))
             # define columns
             columns=['Date','No_Buy_R','No_Buy_I','No_Sell_R','No_Sell_I','Vol_Buy_R','Vol_Buy_I','Vol_Sell_R','Vol_Sell_I','Val_Buy_R','Val_Buy_I','Val_Sell_R','Val_Sell_I']
@@ -691,10 +646,10 @@ def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='14
         return df_RI_tab
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -704,7 +659,7 @@ def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='14
             return
     #---------------------------------------------------------------------------------------------------------------------------------------
     # find web-ids 
-    ticker_no_df = SymbolManager.get_tse_webid(stock)
+    ticker_no_df = __Get_TSE_WebID__(stock)
     if(type(ticker_no_df)==bool):
         return
     # create an empty dataframe:   
@@ -744,13 +699,17 @@ def Get_RI_History(stock = 'خودرو', start_date = '1400-01-01', end_date='14
 ################################################################################################################################################################################
 
 def Get_CWI_History(start_date = '1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    # Returns DataFrame of CWI index history for the given date range.
+    """
+    دریافت سابقه شاخص کل در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص کل بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -760,7 +719,7 @@ def Get_CWI_History(start_date = '1395-01-01', end_date='1400-12-29', ignore_dat
             return
     #---------------------------------------------------------------------------------------------------------------------------------------
     sector_web_id = 32097828799138957
-    r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+    r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
     df_sector = pd.DataFrame(r.text.split(';'))
     columns=['Date','High','Low','Open','Close','Volume','D']
     df_sector[columns] = df_sector[0].str.split(",",expand=True)
@@ -784,13 +743,17 @@ def Get_CWI_History(start_date = '1395-01-01', end_date='1400-12-29', ignore_dat
 ################################################################################################################################################################################
 
 def Get_EWI_History(start_date = '1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = True, show_weekday = False, double_date = False):
-    # Returns DataFrame of EWI index history for the given date range.
+    """
+    دریافت سابقه شاخص هم وزن در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص هم وزن بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -800,7 +763,7 @@ def Get_EWI_History(start_date = '1395-01-01', end_date='1400-12-29', ignore_dat
             return
     #---------------------------------------------------------------------------------------------------------------------------------------
     sector_web_id = 67130298613737946
-    r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+    r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
     df_sector = pd.DataFrame(r.text.split(';'))
     columns=['Date','High','Low','Open','Close','Volume','D']
     df_sector[columns] = df_sector[0].str.split(",",expand=True)
@@ -829,7 +792,8 @@ def __Get_Day_IntradayTrades__(ticker_no, j_date):
     date = jdatetime.date(int(year), int(month), int(day)).togregorian()
     date = f'{date.year:04}{date.month:02}{date.day:02}'
     # request and process
-    page = requests.get(f'https://cdn.tsetmc.com/api/Trade/GetTradeHistory/{ticker_no}/{date}/false', headers=HEADERS)
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    page = requests.get(f'https://cdn.tsetmc.com/api/Trade/GetTradeHistory/{ticker_no}/{date}/false', headers=headers)
     df_intraday = (pd.DataFrame(page.json()['tradeHistory'])).iloc[:,2:6]
     df_intraday = df_intraday.sort_values(by='nTran')
     df_intraday.drop(columns=['nTran'],inplace=True)
@@ -843,11 +807,15 @@ def __Get_Day_IntradayTrades__(ticker_no, j_date):
 ################################################################################################################################################################################
 
 def Get_IntradayTrades_History(stock = 'وخارزم', start_date = '1400-09-15', end_date='1400-12-29', jalali_date = True, combined_datatime = False, show_progress = True):
-    # Returns DataFrame of intraday trades history for the given date range.
+    """
+    دریافت سابقه ریز معاملات یک سهم در روزهای معاملاتی بین تاریخ شروع و پایان
+    اگر فقط به داده های یک روز مشخص نیاز دارید از تاریخ شروع و پایان یکسان استفاده کنید
+    توجه داشته باشید که معاملات باطل شده نماد در خروجی این تابع نمایش داده نمی شود
+    """
     # a function to get price data from a given page ----------------------------------------------------------------------------------
     failed_jdates = []
     def get_price_data_forintraday(ticker_no):
-        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=HEADERS)
+        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=headers)
         df_history=pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
         #split data into defined columns
@@ -860,10 +828,10 @@ def Get_IntradayTrades_History(stock = 'وخارزم', start_date = '1400-09-15'
         df_history = df_history.set_index('Date')
         return df_history
     # check date validity --------------------------------------------------------------------------------------------------------------
-    start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+    start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
     if(start_date==None):
         return
-    end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+    end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
     if(end_date==None):
         return
     start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -873,7 +841,7 @@ def Get_IntradayTrades_History(stock = 'وخارزم', start_date = '1400-09-15'
         return
     #-----------------------------------------------------------------------------------------------------------------------------------
     # find web-ids 
-    ticker_no_df = SymbolManager.get_tse_webid(stock)
+    ticker_no_df = __Get_TSE_WebID__(stock)
     if(type(ticker_no_df)==bool):
         return
     # create an empty dataframe:
@@ -943,6 +911,72 @@ def Get_IntradayTrades_History(stock = 'وخارزم', start_date = '1400-09-15'
 ################################################################################################################################################################################
 ################################################################################################################################################################################
 
+def Get_USD_RIAL(start_date = '1395-01-01', end_date='1400-12-29', ignore_date = False, show_weekday = False, double_date = False):
+    # check date validity --------------------------------------------------------------------------------------------------------------
+    if(not ignore_date):
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
+        if(start_date==None):
+            return
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        if(end_date==None):
+            return
+        start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
+        end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
+        if(start>end):
+            print('Start date must be a day before end date!')
+            return
+    #---------------------------------------------------------------------------------------------------------------------------------------
+    r = requests.get('https://platform.tgju.org/fa/tvdata/history?symbol=PRICE_DOLLAR_RL&resolution=1D', headers=headers)
+    df_data = r.json()
+    try:
+        df_data = pd.DataFrame({'Date':df_data['t'],'Open':df_data['o'],'High':df_data['h'],'Low':df_data['l'],'Close':df_data['c'],})
+        df_data['Date'] = df_data['Date'].apply(lambda x: datetime.datetime.fromtimestamp(x))
+        df_data = df_data.set_index('Date')
+        df_data.index = df_data.index.to_period("D")
+        df_data.index=df_data.index.to_series().astype(str)
+        df_data = df_data.reset_index()
+        df_data['Date'] = pd.to_datetime(df_data['Date'])
+        df_data['Weekday']=df_data['Date'].dt.weekday
+        df_data['Weekday'] = df_data['Weekday'].apply(lambda x: calendar.day_name[x])
+        df_data['J-Date']=df_data['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+        df_data = df_data.set_index('J-Date')
+        df_data=df_data[['Date','Weekday','Open','High','Low','Close']]
+        if(not show_weekday):
+            df_data.drop(columns=['Weekday'],inplace=True)
+        if(not double_date):
+            df_data.drop(columns=['Date'],inplace=True)
+        if(not ignore_date):
+            df_data = df_data[start_date:end_date]
+    except:
+        print('WARNING: USD/RIAL data is not up-to-date! Check the following links to find out what is going on!')
+        print('https://www.tgju.org/profile/price_dollar_rl/technical')
+        print('https://www.tgju.org/profile/price_dollar_rl/history')
+        url = 'https://api.accessban.com/v1/market/indicator/summary-table-data/price_dollar_rl' # get existing history
+        r = requests.get(url, headers=headers)
+        df_data = pd.DataFrame(r.json()['data'])
+        df_data.columns = ['Open','Low','High','Close','4','3','Date','7']
+        df_data = df_data[['Date','Open','High','Low','Close']]
+        df_data['Date'] = pd.to_datetime(df_data['Date'])
+        df_data['Weekday']=df_data['Date'].dt.weekday
+        df_data['Weekday'] = df_data['Weekday'].apply(lambda x: calendar.day_name[x])
+        df_data['J-Date']=df_data['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+        df_data = df_data.set_index('J-Date')
+        df_data=df_data[['Date','Weekday','Open','High','Low','Close']]
+        cols = ['Open','High','Low','Close']
+        df_data['Open'] = df_data['Open'].apply(lambda x: x.replace(',',''))
+        df_data['High'] = df_data['High'].apply(lambda x: x.replace(',',''))
+        df_data['Low'] = df_data['Low'].apply(lambda x: x.replace(',',''))
+        df_data['Close'] = df_data['Close'].apply(lambda x: x.replace(',',''))
+        df_data[cols] = df_data[cols].apply(pd.to_numeric).astype('int64')
+        df_data = df_data[df_data['Open']!=0]
+        df_data = df_data.iloc[::-1]
+        if(not show_weekday):
+            df_data.drop(columns=['Weekday'],inplace=True)
+        if(not double_date):
+            df_data.drop(columns=['Date'],inplace=True)
+        if(not ignore_date):
+            df_data = df_data[start_date: end_date]
+    return df_data
 
 ################################################################################################################################################################################
 ################################################################################################################################################################################
@@ -953,12 +987,12 @@ def __Get_Day_MarketClose_BQ_SQ__(ticker_no, j_date):
     date = jdatetime.date(int(year), int(month), int(day)).togregorian()
     date = f'{date.year:04}{date.month:02}{date.day:02}'
     # get day upper and lower band prices:
-    page = requests.get(f'https://cdn.tsetmc.com/api/MarketData/GetStaticThreshold/{ticker_no}/{date}', headers=HEADERS)
+    page = requests.get(f'https://cdn.tsetmc.com/api/MarketData/GetStaticThreshold/{ticker_no}/{date}', headers=headers)
     df_ub_lb = pd.DataFrame(page.json()['staticThreshold'])
     day_ub = df_ub_lb.iloc[-1]['psGelStaMax']    # day upper band price
     day_lb = df_ub_lb.iloc[-1]['psGelStaMin']    # day lower band price
     # get LOB data:
-    page = requests.get(f'https://cdn.tsetmc.com/api/BestLimits/{ticker_no}/{date}', headers=HEADERS)
+    page = requests.get(f'https://cdn.tsetmc.com/api/BestLimits/{ticker_no}/{date}', headers=headers)
     data = pd.DataFrame(page.json()['bestLimitsHistory'])
     # find last orders before 12:30:00 (market close)
     time = 123000
@@ -990,10 +1024,13 @@ def __Get_Day_MarketClose_BQ_SQ__(ticker_no, j_date):
 ################################################################################################################################################################################
 
 def Get_Queue_History(stock = 'وخارزم', start_date = '1400-09-15', end_date='1400-12-29', show_per_capita = True, show_weekday = False, double_date = False, show_progress = True):
-    # Returns DataFrame of queue history for the given date range.
+    """
+    دریافت ارزش صف خرید یا فروش یک سهم در زمان بسته شدن بازار، در روزهای معاملاتی بین تاریخ شروع و پایان
+    اگر فقط به داده های یک روز مشخص نیاز دارید از تاریخ شروع و پایان یکسان استفاده کنید
+    """
     # a function to get price data from a given page ----------------------------------------------------------------------------------
     def get_price_data_forintraday(ticker_no):
-        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=HEADERS)
+        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=headers)
         df_history=pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
         #split data into defined columns
@@ -1007,10 +1044,10 @@ def Get_Queue_History(stock = 'وخارزم', start_date = '1400-09-15', end_dat
         return df_history
     # check date validity --------------------------------------------------------------------------------------------------------------
     failed_jdates = []
-    start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+    start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
     if(start_date==None):
         return
-    end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+    end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
     if(end_date==None):
         return
     start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1020,7 +1057,7 @@ def Get_Queue_History(stock = 'وخارزم', start_date = '1400-09-15', end_dat
         return
     #-----------------------------------------------------------------------------------------------------------------------------------
     # find web-ids 
-    ticker_no_df = SymbolManager.get_tse_webid(stock)
+    ticker_no_df = __Get_TSE_WebID__(stock)
     if(type(ticker_no_df)==bool):
         return
     # create an empty dataframe:
@@ -1085,12 +1122,12 @@ def __Get_Day_LOB__(ticker_no, j_date):
     date = jdatetime.date(int(year), int(month), int(day)).togregorian()
     date = f'{date.year:04}{date.month:02}{date.day:02}'
     # get day upper and lower band prices:
-    page = requests.get(f'https://cdn.tsetmc.com/api/MarketData/GetStaticThreshold/{ticker_no}/{date}', headers=HEADERS)
+    page = requests.get(f'https://cdn.tsetmc.com/api/MarketData/GetStaticThreshold/{ticker_no}/{date}', headers=headers)
     df_ub_lb = pd.DataFrame(page.json()['staticThreshold'])
     day_ub = df_ub_lb.iloc[-1]['psGelStaMax']    # day upper band price
     day_lb = df_ub_lb.iloc[-1]['psGelStaMin']    # day lower band price
     # get LOB data:
-    page = requests.get(f'https://cdn.tsetmc.com/api/BestLimits/{ticker_no}/{date}',headers=HEADERS)
+    page = requests.get(f'https://cdn.tsetmc.com/api/BestLimits/{ticker_no}/{date}',headers=headers)
     data = pd.DataFrame(page.json()['bestLimitsHistory'])
     data.drop(columns=['idn','dEven','refID','insCode'],inplace=True)
     data = data.sort_values(['hEven','number'], ascending = (True, True))
@@ -1109,10 +1146,13 @@ def __Get_Day_LOB__(ticker_no, j_date):
     return data
 
 def Get_IntradayOB_History(stock = 'کرمان', start_date = '1400-08-01', end_date='1400-08-01', jalali_date = True, combined_datatime = False, show_progress = True):
-    # Returns DataFrame of intraday order book history for the given date range.
+    """
+    دریافت اطلاعات عرضه تقاضای اردر بوک برای یک سهم، در روزهای معاملاتی بین تاریخ شروع و پایان
+    اگر فقط به داده های یک روز مشخص نیاز دارید از تاریخ شروع و پایان یکسان استفاده کنید
+    """
 # a function to get price data from a given page ----------------------------------------------------------------------------------
     def get_price_data_forintraday(ticker_no):
-        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=HEADERS)
+        r = requests.get(f'https://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={ticker_no}&Top=999999&A=0', headers=headers)
         df_history=pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Final','Close','Open','Y-Final','Value','Volume','No']
         #split data into defined columns
@@ -1126,10 +1166,10 @@ def Get_IntradayOB_History(stock = 'کرمان', start_date = '1400-08-01', end_
         return df_history
     # check date validity --------------------------------------------------------------------------------------------------------------
     failed_jdates = []
-    start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+    start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
     if(start_date==None):
         return
-    end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+    end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
     if(end_date==None):
         return
     start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1139,7 +1179,7 @@ def Get_IntradayOB_History(stock = 'کرمان', start_date = '1400-08-01', end_
         return
     #-----------------------------------------------------------------------------------------------------------------------------------
     # find web-ids 
-    ticker_no_df = SymbolManager.get_tse_webid(stock)
+    ticker_no_df = __Get_TSE_WebID__(stock)
     if(type(ticker_no_df)==bool):
         return
     # create an empty dataframe:
@@ -1207,13 +1247,18 @@ def Get_IntradayOB_History(stock = 'کرمان', start_date = '1400-08-01', end_
 
 def Get_SectorIndex_History(sector = 'خودرو', start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, \
                             just_adj_close = False, show_weekday = False, double_date = False):
-    # Returns DataFrame of sector index history for the given date range.
+    """
+    دریافت سابقه شاخص گروه صنعت مد نظر در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص گروه صنعت مد نظر بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص گروه صنعت مد نظر
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1222,19 +1267,14 @@ def Get_SectorIndex_History(sector = 'خودرو', start_date='1395-01-01', end_
             print('Start date must be a day before end date!')
             return
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
-    # TODO: Implement IndexManager.__Get_TSE_Sector_WebID__ or replace with correct logic
-    # try:
-    #     sector_web_id = IndexManager.__Get_TSE_Sector_WebID__(sector_name = sector)
-    # except:
-    #     print('Please Enter a Valid Name for Sector Index!')
-    #     return
-    # if(sector_web_id == None):
-    #     return
-    sector_web_id = None  # Placeholder, must implement sector_web_id lookup
-    print('WARNING: sector_web_id lookup not implemented. Please implement IndexManager.__Get_TSE_Sector_WebID__')
-    if(sector_web_id is None):
+    try:
+        sector_web_id = __Get_TSE_Sector_WebID__(sector_name = sector)
+    except:
+        print('Please Enter a Valid Name for Sector Index!')
         return
-    r_cl = requests.get(f'https://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    if(sector_web_id == None):
+        return
+    r_cl = requests.get(f'https://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1247,7 +1287,7 @@ def Get_SectorIndex_History(sector = 'خودرو', start_date='1395-01-01', end_
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'https://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1277,13 +1317,19 @@ def Get_SectorIndex_History(sector = 'خودرو', start_date='1395-01-01', end_
 ################################################################################################################################################################################
 
 def Get_CWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    # Returns DataFrame of CWPI index history for the given date range.
+    """
+    CWPI: Cap-Weighted Price Index = TEPIX = شاخص قیمت (وزنی-ارزشی)
+    دریافت سابقه شاخص قیمت در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص قیمت بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص قیمت
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1293,7 +1339,7 @@ def Get_CWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
             return
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 5798407779416661
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1306,7 +1352,7 @@ def Get_CWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1333,73 +1379,87 @@ def Get_CWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
 
 ################################################################################################################################################################################
 ################################################################################################################################################################################
-def Get_EWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date=False, just_adj_close=False, show_weekday=False, double_date=False):
-    # Returns DataFrame of EWPI index history for the given date range.
-    import jdatetime, calendar, requests, pandas as pd
-    HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-    def check_jdate_validity(date_str, key_word):
-        # Dummy check, replace with actual logic if needed
-        return date_str
-    if not ignore_date:
-        start_date = check_jdate_validity(start_date, "'START'")
-        if start_date is None:
-            return None
-        end_date = check_jdate_validity(end_date, "'END'")
-        if end_date is None:
-            return None
+
+def Get_EWPI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
+    """
+    EWPI: Equal-Weighted Price Index = شاخص قیمت (هم وزن)
+    دریافت سابقه شاخص قیمت هم وزن در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص قیمت هم وزن بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص قیمت هم وزن
+    """
+    # check date validity --------------------------------------------------------------------------------------------------------------
+    if(not ignore_date):
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
+        if(start_date==None):
+            return
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        if(end_date==None):
+            return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
         end = jdatetime.date(year=int(end_date.split('-')[0]), month=int(end_date.split('-')[1]), day=int(end_date.split('-')[2]))
-        if start > end:
+        if(start>end):
             print('Start date must be a day before end date!')
-            return None
+            return
+    # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 8384385859414435
-    r_cl = requests.get(f'http://tsetmc.com/tsev2/chart/data/Index.aspx?i={sector_web_id}&t=value', headers=HEADERS)
+    # get only close chart data for sector index:
+    r_cl = requests.get(f'http://tsetmc.com/tsev2/chart/data/Index.aspx?i={sector_web_id}&t=value', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.text.split(';'))
-    columns = ['J-Date', 'Adj Close']
-    df_sector_cl[columns] = df_sector_cl[0].str.split(",", expand=True)
-    df_sector_cl.drop(columns=[0], inplace=True)
-    df_sector_cl['J-Date'] = df_sector_cl['J-Date'].apply(lambda x: str(jdatetime.date(int(x.split('/')[0]), int(x.split('/')[1]), int(x.split('/')[2]))))
-    df_sector_cl['Date'] = df_sector_cl['J-Date'].apply(lambda x: jdatetime.date(int(x[:4]), int(x[5:7]), int(x[8:])).togregorian())
+    columns=['J-Date','Adj Close']
+    df_sector_cl[columns] = df_sector_cl[0].str.split(",",expand=True)
+    df_sector_cl.drop(columns=[0],inplace=True)
+    df_sector_cl['J-Date'] = df_sector_cl['J-Date'].apply(lambda x: str(jdatetime.date(int(x.split('/')[0]),int(x.split('/')[1]),int(x.split('/')[2]))))
+    df_sector_cl['Date'] = df_sector_cl['J-Date'].apply(lambda x: jdatetime.date(int(x[:4]),int(x[5:7]),int(x[8:])).togregorian())  
     df_sector_cl['Date'] = pd.to_datetime(df_sector_cl['Date'])
-    df_sector_cl['Weekday'] = df_sector_cl['Date'].dt.weekday
+    df_sector_cl['Weekday']=df_sector_cl['Date'].dt.weekday
     df_sector_cl['Weekday'] = df_sector_cl['Weekday'].apply(lambda x: calendar.day_name[x])
     df_sector_cl = df_sector_cl.set_index('J-Date')
-    df_sector_cl = df_sector_cl[['Date', 'Weekday', 'Adj Close']]
+    df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
-    if not just_adj_close:
-        r = requests.get(f'http://www.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+    if(not just_adj_close):
+        r = requests.get(f'http://www.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
-        columns = ['Date', 'High', 'Low', 'Open', 'Close', 'Volume', 'D']
-        df_sector[columns] = df_sector[0].str.split(",", expand=True)
-        df_sector.drop(columns=[0, 'D'], inplace=True)
-        df_sector['Date'] = pd.to_datetime(df_sector['Date'])
-        df_sector['J-Date'] = df_sector['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
+        columns=['Date','High','Low','Open','Close','Volume','D']
+        # split data into defined columns
+        df_sector[columns] = df_sector[0].str.split(",",expand=True)
+        df_sector.drop(columns=[0,'D'],inplace=True)
+        df_sector['Date']=pd.to_datetime(df_sector['Date'])
+        df_sector['J-Date']=df_sector['Date'].apply(lambda x: str(jdatetime.date.fromgregorian(date=x.date())))
         df_sector = df_sector.set_index('J-Date')
-        df_sector.drop(columns=['Date'], inplace=True)
-        df_sector_cl = pd.concat([df_sector, df_sector_cl], axis=1).dropna()
-        df_sector_cl = df_sector_cl[['Date', 'Weekday', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']]
-        cols = ['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+        df_sector.drop(columns=['Date'],inplace=True)
+        # now concat:
+        df_sector_cl = pd.concat([df_sector,df_sector_cl],axis=1).dropna()
+        df_sector_cl = df_sector_cl[['Date','Weekday','Open','High','Low','Close','Adj Close','Volume']]
+        cols = ['Open','High','Low','Close','Adj Close','Volume']
         df_sector_cl[cols] = df_sector_cl[cols].apply(pd.to_numeric, axis=1)
         df_sector_cl['Volume'] = df_sector_cl['Volume'].astype('int64')
-    if not show_weekday:
-        df_sector_cl.drop(columns=['Weekday'], inplace=True)
-    if not double_date:
-        df_sector_cl.drop(columns=['Date'], inplace=True)
-    if not ignore_date:
-        df_sector_cl = df_sector_cl[start_date:end_date]
+    if(not show_weekday):
+        df_sector_cl.drop(columns=['Weekday'],inplace=True)
+    if(not double_date):
+        df_sector_cl.drop(columns=['Date'],inplace=True)
+    # slice requested time window:
+    if(not ignore_date):
+        df_sector_cl = df_sector_cl[start_date:end_date]    
     return df_sector_cl
 
 ################################################################################################################################################################################
 ################################################################################################################################################################################
 
 def Get_FFI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-
+    """
+    FFI: Free-Float Index = شاخص شناور آزاد
+    دریافت سابقه شاخص شناور آزاد در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص شناور آزاد بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص شناور آزاد
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1409,7 +1469,7 @@ def Get_FFI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date 
             return
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 49579049405614711
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1422,7 +1482,7 @@ def Get_FFI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date 
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1451,13 +1511,19 @@ def Get_FFI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date 
 ################################################################################################################################################################################
 
 def Get_MKT1I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    
+    """
+    MKT1I: First Market Index = شاخص بازار اول
+    دریافت سابقه شاخص بازار اول بورس در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص بازار اول بورس بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص بازار اول بورس
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1467,7 +1533,7 @@ def Get_MKT1I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
             return
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 62752761908615603
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1480,7 +1546,7 @@ def Get_MKT1I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1509,13 +1575,19 @@ def Get_MKT1I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
 ################################################################################################################################################################################
 
 def Get_MKT2I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    
+    """
+    MKT2I: Second Market Index = شاخص بازار دوم
+    دریافت سابقه شاخص بازار دوم بورس در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص بازار دوم بورس بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص بازار دوم بورس
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1526,7 +1598,7 @@ def Get_MKT2I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 71704845530629737
     # get only close chart data for sector index:
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1539,7 +1611,7 @@ def Get_MKT2I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1568,13 +1640,19 @@ def Get_MKT2I_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
 ################################################################################################################################################################################
 
 def Get_INDI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    
+    """
+    INDI: Industry Index = شاخص صنعت
+    دریافت سابقه شاخص صنعت بورس در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص صنعت بورس بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص صنعت بورس
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1585,7 +1663,7 @@ def Get_INDI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 43754960038275285
     # get only close chart data for sector index:
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1598,7 +1676,7 @@ def Get_INDI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1627,13 +1705,19 @@ def Get_INDI_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date
 ################################################################################################################################################################################
 
 def Get_LCI30_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    
+    """
+    30LCI: 30 Large-Cap Index = شاخص 30 شرکت بزرگ بورس
+    دریافت سابقه شاخص 30 شرکت بزرگ بورس در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص 30 شرکت بزرگ بورس بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص 30 شرکت بزرگ بورس
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1644,7 +1728,7 @@ def Get_LCI30_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 10523825119011581
     # get only close chart data for sector index:
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1657,7 +1741,7 @@ def Get_LCI30_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1686,13 +1770,19 @@ def Get_LCI30_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
 ################################################################################################################################################################################
 
 def Get_ACT50_History(start_date='1395-01-01', end_date='1400-12-29', ignore_date = False, just_adj_close = False, show_weekday = False, double_date = False):
-    
+    """
+    ACT50: 50 Most Active Stocks Index = شاخص 50 شرکت فعال بورس
+    دریافت سابقه شاخص 50 شرکت فعال بورس در روزهای معاملاتی بین تاریخ شروع و پایان
+    قابلیت دریافت همه سابقه شاخص 50 شرکت فعال بورس بدون توجه به تاریخ شروع و پایان
+    قابلیت ارائه تاریخ میلادی علاوه بر تاریخ شمسی، قابلیت نمایش روزهای هفته
+    قابلیت دریافت فقط مقدار پایانی روز برای شاخص 50 شرکت فعال بورس
+    """
     # check date validity --------------------------------------------------------------------------------------------------------------
     if(not ignore_date):
-        start_date = GravityTSEManager.__Check_JDate_Validity__(start_date,key_word="'START'")
+        start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = GravityTSEManager.__Check_JDate_Validity__(end_date,key_word="'END'")
+        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -1703,7 +1793,7 @@ def Get_ACT50_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     # get sector web-id ---------------------------------------------------------------------------------------------------------------------
     sector_web_id = 46342955726788357
     # get only close chart data for sector index:
-    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=HEADERS)
+    r_cl = requests.get(f'http://cdn.tsetmc.com/api/Index/GetIndexB2History/{sector_web_id}', headers=headers)
     df_sector_cl = pd.DataFrame(r_cl.json()['indexB2'])[['dEven','xNivInuClMresIbs']]
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: str(x))
     df_sector_cl['dEven'] = df_sector_cl['dEven'].apply(lambda x: x[:4]+'-'+x[4:6]+'-'+x[-2:])
@@ -1716,7 +1806,7 @@ def Get_ACT50_History(start_date='1395-01-01', end_date='1400-12-29', ignore_dat
     df_sector_cl = df_sector_cl[['Date','Weekday','Adj Close']]
     df_sector_cl['Adj Close'] = pd.to_numeric(df_sector_cl['Adj Close'])
     if(not just_adj_close):
-        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=HEADERS)
+        r = requests.get(f'http://old.tsetmc.com/tsev2/chart/data/IndexFinancial.aspx?i={sector_web_id}&t=ph', headers=headers)
         df_sector = pd.DataFrame(r.text.split(';'))
         columns=['Date','High','Low','Open','Close','Volume','D']
         # split data into defined columns
@@ -1747,7 +1837,7 @@ def Get_MarketWatch(save_excel = True, save_path = 'D:/FinPy-TSE Data/MarketWatc
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     # GET MARKET RETAIL AND INSTITUTIONAL DATA
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    r = requests.get('http://old.tsetmc.com/tsev2/data/ClientTypeAll.aspx', headers=HEADERS)
+    r = requests.get('http://old.tsetmc.com/tsev2/data/ClientTypeAll.aspx', headers=headers)
     Mkt_RI_df = pd.DataFrame(r.text.split(';'))
     Mkt_RI_df = Mkt_RI_df[0].str.split(",",expand=True)
     # assign names to columns:
@@ -1762,7 +1852,7 @@ def Get_MarketWatch(save_excel = True, save_path = 'D:/FinPy-TSE Data/MarketWatc
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     # GET MARKET WATCH PRICE AND OB DATA
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=HEADERS)
+    r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=headers)
     main_text = r.text
     Mkt_df = pd.DataFrame((main_text.split('@')[2]).split(';'))
     Mkt_df = Mkt_df[0].str.split(",",expand=True)
@@ -1778,7 +1868,7 @@ def Get_MarketWatch(save_excel = True, save_path = 'D:/FinPy-TSE Data/MarketWatc
     Mkt_df['Market'] = Mkt_df['Mkt-ID'].map({'300':'بورس','303':'فرابورس','305':'صندوق قابل معامله','309':'پایه','400':'حق تقدم بورس','403':'حق تقدم فرابورس','404':'حق تقدم پایه'})
     Mkt_df.drop(columns=['Mkt-ID'],inplace=True)   # we do not need Mkt-ID column anymore
     # assign sector names:
-    r = requests.get('https://cdn.tsetmc.com/api/StaticData/GetStaticData', headers=HEADERS)
+    r = requests.get('https://cdn.tsetmc.com/api/StaticData/GetStaticData', headers=headers)
     sec_df = pd.DataFrame(r.json()['staticData'])
     sec_df['code'] = (sec_df['code'].astype(str).apply(lambda x: '0' + x if len(x) == 1 else x))
     sec_df['name'] = (sec_df['name'].apply(lambda x: re.sub(r'\u200c', '', x)).str.strip().apply(characters.ar_to_fa))
@@ -1849,7 +1939,10 @@ def Get_MarketWatch(save_excel = True, save_path = 'D:/FinPy-TSE Data/MarketWatc
                          'Name','Market','Sector','Share-No','Base-Vol','Market Cap','EPS','Download']]
     final_df = final_df.set_index('Ticker')
     # convert columns to int64 data type:
-        # (removed stray commented-out code)
+    """cols = ['Open','High','Low','Close','Final','Day_UL', 'Day_LL','Value', 'BQ-Value', 'SQ-Value', 'BQPC', 'SQPC',
+            'Volume','Vol_Buy_R', 'Vol_Buy_I', 'Vol_Sell_R', 'Vol_Sell_I','No','No_Buy_R', 'No_Buy_I', 'No_Sell_R', 'No_Sell_I',
+            'Share-No','Base-Vol','Market Cap']
+    final_df[cols] = final_df[cols].astype('int64')"""
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     # PROCESS ORDER BOOK DATA IF REQUESTED
     #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2040,7 +2133,7 @@ def Build_Market_StockList(bourse = True, farabourse = True, payeh = True, detai
             payeh_lookup['Ticker'] = payeh_lookup['Ticker'].apply(lambda x: characters.ar_to_fa(x))
             payeh_lookup = payeh_lookup.set_index('Ticker')
             # look for payeh market web-ids from market watch
-            r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=HEADERS)
+            r = requests.get('http://old.tsetmc.com/tsev2/data/MarketWatchPlus.aspx', headers=headers)
             mkt_watch = pd.DataFrame((r.text.split('@')[2]).split(';'))
             mkt_watch = mkt_watch[0].str.split(",",expand=True)
             mkt_watch = mkt_watch[[0,2]]
@@ -2061,7 +2154,7 @@ def Build_Market_StockList(bourse = True, farabourse = True, payeh = True, detai
                     clear_output(wait=True)
                     print('Searching Payeh market stocks web-pages: ', f'{round((counter)/no_stocks*100,1)} %')
                 # search with ticker, if you find nothing, then search with name
-                code_df = SymbolManager.get_tse_webid(index)
+                code_df = __Get_TSE_WebID__(index)
                 code_df = code_df.reset_index()
                 try:
                     web_id.append(code_df[code_df['Active']==1].iloc[0]['WEB-ID'])
@@ -2098,7 +2191,7 @@ def Build_Market_StockList(bourse = True, farabourse = True, payeh = True, detai
                 return df_final
             async def get_session(session, code):
                 url = f'http://old.tsetmc.com/Loader.aspx?Partree=15131M&i={code}'
-                async with session.get(url, headers=HEADERS) as response:
+                async with session.get(url, headers=headers) as response:
                     try:
                         data_text = await response.text()
                         soup = BeautifulSoup(data_text, 'html.parser')
@@ -2184,7 +2277,7 @@ def __get_history_data_group_parallel__(stock_list) :
             async def get_data(session, stock):
                 url = f'http://old.tsetmc.com/tsev2/data/search.aspx?skey={stock}'
                 #ارسال درخواست
-                async with session.get(url, headers=HEADERS) as response:
+                async with session.get(url, headers=headers) as response:
                     data_id = await response.text()
 
                     #تبدیل به لیست کردن دیتای مورد نیاز
@@ -2228,7 +2321,7 @@ def __get_history_data_group_parallel__(stock_list) :
             for stock in stock_list :
                 while True :
                     try :
-                        data_id = requests.get(f'http://old.tsetmc.com/tsev2/data/search.aspx?skey={stock}', headers=HEADERS).text
+                        data_id = requests.get(f'http://old.tsetmc.com/tsev2/data/search.aspx?skey={stock}', headers=headers).text
                         break
                     except :
                         print('nn')
@@ -2353,7 +2446,7 @@ def __get_history_data_group_parallel__(stock_list) :
             async def get_data(session, code):
                 url = f'http://old.tsetmc.com/tsev2/data/InstTradeHistory.aspx?i={code}&Top=999999&A=0'
                 #ارسال درخواست
-                async with session.get(url, headers=HEADERS) as response:
+                async with session.get(url, headers=headers) as response:
                     data_id = await response.text()
                     return [data_id,response.status]
 
@@ -2763,9 +2856,11 @@ def Get_60D_PriceHistory(stock_list, adjust_price = True, show_progress = True, 
 ###########################################################################################################################################################
 
 def Get_ShareHoldersInfo(ticker = 'خودرو'):
-    
+    """
+    دریافت آخرین وضعیت سهامداران بالای 1% نماد مورد نظر 
+    """
     # find web-ids 
-    ticker_no_df = SymbolManager.get_tse_webid(ticker)
+    ticker_no_df = __Get_TSE_WebID__(ticker)
     if(type(ticker_no_df)==bool):
         return
     ticker_no_df.reset_index(inplace=True)
@@ -2773,8 +2868,17 @@ def Get_ShareHoldersInfo(ticker = 'خودرو'):
     wid = ticker_no_df['WEB-ID'].values[0]
     market = ticker_no_df['Market'].values[0]
 
+    """
+    دریافت اطلاعات سهامداران یک نماد از سایت TSETMC و ذخیره در دیتابیس
+    خروجی: DataFrame و ذخیره در جدول shareholders_info
+    """
+    import requests
+    import pandas as pd
+    import jdatetime
+    from app.db import SessionLocal, ShareholdersInfo
+    from . import __Get_TSE_WebID__
     # دریافت WebID نماد
-    webid_df = SymbolManager.get_tse_webid(ticker)
+    webid_df = __Get_TSE_WebID__(ticker)
     if type(webid_df) == bool:
         print('نماد معتبر نیست!')
         return False
@@ -2806,36 +2910,7 @@ def Get_ShareHoldersInfo(ticker = 'خودرو'):
     df['date'] = today
     df['symbol'] = ticker
     # ذخیره در دیتابیس
-    # تعریف SessionLocal اگر قبلاً تعریف نشده است
-    try:
-        session = SessionLocal()
-    except NameError:
-        from sqlalchemy.orm import sessionmaker
-        from sqlalchemy import create_engine
-        # لطفاً آدرس دیتابیس خود را جایگزین کنید
-        engine = create_engine('sqlite:///your_database.db')
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        session = SessionLocal()
-    # Define ShareholdersInfo ORM model if not already defined
-    try:
-        ShareholdersInfo
-    except NameError:
-        from sqlalchemy.ext.declarative import declarative_base
-        from sqlalchemy import Column, Integer, String, Float, Date
-
-        Base = declarative_base()
-        class ShareholdersInfo(Base):
-            __tablename__ = "shareholders_info"
-            id = Column(Integer, primary_key=True, autoincrement=True)
-            symbol = Column(String, index=True)
-            date = Column(String)
-            holder_name = Column(String)
-            holder_type = Column(String)
-            shares = Column(Integer)
-            percent = Column(Float)
-            change = Column(Integer)
-            national_id = Column(String)
-
+    session = SessionLocal()
     count = 0
     for _, row in df.iterrows():
         holder = ShareholdersInfo(
@@ -2883,4 +2958,3 @@ def Get_ShareHoldersInfo(ticker = 'خودرو'):
     df_sh['Market'] = market
     df_sh.set_index(['Ticker','Market','Name'], inplace=True)
     return df_sh
->>>>>>> 5489f53c21f43bc57a9de23edc6ccf15f223d306
