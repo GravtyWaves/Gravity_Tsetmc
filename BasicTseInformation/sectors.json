@@ -1,101 +1,170 @@
-
 [
     {
-        "SectorID":55.0,
-        "SectorName":"هتل و رستوران"
+        "SectorCode": 55.0,
+        "SectorName": "هتل و رستوران",
+        "SectorNameEn": "Hotels and Restaurants",
+        "NAICSCode": 72,
+        "NAICSName": "Accommodation and Food Services"
     },
     {
-        "SectorID":72.0,
-        "SectorName":"رایانه و فعالیت های وابسته به آن"
+        "SectorCode": 72.0,
+        "SectorName": "رایانه و فعالیت های وابسته به آن",
+        "SectorNameEn": "Computer and Related Activities",
+        "NAICSCode": 5415,
+        "NAICSName": "Computer Systems Design and Related Services"
     },
     {
-        "SectorID":27.0,
-        "SectorName":"فلزات اساسی"
+        "SectorCode": 27.0,
+        "SectorName": "فلزات اساسی",
+        "SectorNameEn": "Basic Metals",
+        "NAICSCode": 331,
+        "NAICSName": "Primary Metal Manufacturing"
     },
     {
-        "SectorID":13.0,
-        "SectorName":"استخراج کانه های فلزی"
+        "SectorCode": 13.0,
+        "SectorName": "استخراج کانه های فلزی",
+        "SectorNameEn": "Metal Ore Mining",
+        "NAICSCode": 2122,
+        "NAICSName": "Metal Ore Mining"
     },
     {
-        "SectorID":64.0,
-        "SectorName":"مخابرات"
+        "SectorCode": 64.0,
+        "SectorName": "مخابرات",
+        "SectorNameEn": "Telecommunications",
+        "NAICSCode": 517,
+        "NAICSName": "Telecommunications"
     },
     {
-        "SectorID":53.0,
-        "SectorName":"سیمان، آهک و گچ"
+        "SectorCode": 53.0,
+        "SectorName": "سیمان، آهک و گچ",
+        "SectorNameEn": "Cement, Lime and Gypsum",
+        "NAICSCode": 3273,
+        "NAICSName": "Cement and Concrete Product Manufacturing"
     },
     {
-        "SectorID":73.0,
-        "SectorName":"اطلاعات و ارتباطات"
+        "SectorCode": 73.0,
+        "SectorName": "اطلاعات و ارتباطات",
+        "SectorNameEn": "Information and Communications",
+        "NAICSCode": 51,
+        "NAICSName": "Information"
     },
     {
-        "SectorID":47.0,
-        "SectorName":"خرده فروشی،باستثنای وسایل نقلیه موتوری"
+        "SectorCode": 47.0,
+        "SectorName": "خرده فروشی،باستثنای وسایل نقلیه موتوری",
+        "SectorNameEn": "Retail Trade, Except Motor Vehicles",
+        "NAICSCode": 44-45,
+        "NAICSName": "Retail Trade"
     },
     {
-        "SectorID":67.0,
-        "SectorName":"فعالیتهای کمکی به نهادهای مالی واسط"
+        "SectorCode": 67.0,
+        "SectorName": "فعالیتهای کمکی به نهادهای مالی واسط",
+        "SectorNameEn": "Auxiliary Activities for Financial Intermediation",
+        "NAICSCode": 523,
+        "NAICSName": "Securities, Commodity Contracts, and Other Financial Investments and Related Activities"
     },
     {
-        "SectorID":31.0,
-        "SectorName":"ماشین آلات و دستگاه های برقی"
+        "SectorCode": 31.0,
+        "SectorName": "ماشین آلات و دستگاه های برقی",
+        "SectorNameEn": "Electrical Machinery and Apparatus",
+        "NAICSCode": 335,
+        "NAICSName": "Electrical Equipment, Appliance, and Component Manufacturing"
     },
     {
-        "SectorID":43.0,
-        "SectorName":"مواد و محصولات دارویی"
+        "SectorCode": 43.0,
+        "SectorName": "مواد و محصولات دارویی",
+        "SectorNameEn": "Pharmaceutical Materials and Products",
+        "NAICSCode": 3254,
+        "NAICSName": "Pharmaceutical and Medicine Manufacturing"
     },
     {
-        "SectorID":44.0,
-        "SectorName":"محصولات شیمیایی"
+        "SectorCode": 44.0,
+        "SectorName": "محصولات شیمیایی",
+        "SectorNameEn": "Chemical Products",
+        "NAICSCode": 325,
+        "NAICSName": "Chemical Manufacturing"
     },
     {
-        "SectorID":25.0,
-        "SectorName":"لاستیک و پلاستیک"
+        "SectorCode": 25.0,
+        "SectorName": "لاستیک و پلاستیک",
+        "SectorNameEn": "Rubber and Plastics",
+        "NAICSCode": 326,
+        "NAICSName": "Plastics and Rubber Products Manufacturing"
     },
     {
-        "SectorID":56.0,
-        "SectorName":"سرمایه گذاریها"
+        "SectorCode": 56.0,
+        "SectorName": "سرمایه گذاریها",
+        "SectorNameEn": "Investments",
+        "NAICSCode": 525,
+        "NAICSName": "Funds, Trusts, and Other Financial Vehicles"
     },
     {
-        "SectorID":70.0,
-        "SectorName":"انبوه سازی، املاک و مستغلات"
+        "SectorCode": 70.0,
+        "SectorName": "انبوه سازی، املاک و مستغلات",
+        "SectorNameEn": "Real Estate Development and Properties",
+        "NAICSCode": 531,
+        "NAICSName": "Real Estate"
     },
     {
-        "SectorID":22.0,
-        "SectorName":"انتشار، چاپ و تکثیر"
+        "SectorCode": 22.0,
+        "SectorName": "انتشار، چاپ و تکثیر",
+        "SectorNameEn": "Publishing, Printing and Reproduction",
+        "NAICSCode": 511,
+        "NAICSName": "Publishing Industries"
     },
     {
-        "SectorID":28.0,
-        "SectorName":"ساخت محصولات فلزی"
+        "SectorCode": 28.0,
+        "SectorName": "ساخت محصولات فلزی",
+        "SectorNameEn": "Fabricated Metal Products",
+        "NAICSCode": 332,
+        "NAICSName": "Fabricated Metal Product Manufacturing"
     },
     {
-        "SectorID":20.0,
-        "SectorName":"محصولات چوبی"
+        "SectorCode": 20.0,
+        "SectorName": "محصولات چوبی",
+        "SectorNameEn": "Wood Products",
+        "NAICSCode": 321,
+        "NAICSName": "Wood Product Manufacturing"
     },
     {
-        "SectorID":21.0,
-        "SectorName":"محصولات کاغذی"
+        "SectorCode": 21.0,
+        "SectorName": "محصولات کاغذی",
+        "SectorNameEn": "Paper Products",
+        "NAICSCode": 322,
+        "NAICSName": "Paper Manufacturing"
     },
     {
-        "SectorID":60.0,
-        "SectorName":"حمل ونقل، انبارداری و ارتباطات"
+        "SectorCode": 60.0,
+        "SectorName": "حمل ونقل، انبارداری و ارتباطات",
+        "SectorNameEn": "Transport, Storage and Communications",
+        "NAICSCode": 48-49,
+        "NAICSName": "Transportation and Warehousing"
     },
     {
-        "SectorID":11.0,
-        "SectorName":"استخراج نفت گاز و خدمات جنبی جز اکتشاف"
+        "SectorCode": 11.0,
+        "SectorName": "استخراج نفت گاز و خدمات جنبی جز اکتشاف",
+        "SectorNameEn": "Oil and Gas Extraction and Related Services (Excluding Exploration)",
+        "NAICSCode": 211,
+        "NAICSName": "Oil and Gas Extraction"
     },
     {
-        "SectorID":34.0,
-        "SectorName":"خودرو و ساخت قطعات"
+        "SectorCode": 34.0,
+        "SectorName": "خودرو و ساخت قطعات",
+        "SectorNameEn": "Automotive and Parts Manufacturing",
+        "NAICSCode": 3361,
+        "NAICSName": "Motor Vehicle Manufacturing"
     },
     {
-        "SectorID":74.0,
-        "SectorName":"خدمات فنی و مهندسی"
+        "SectorCode": 74.0,
+        "SectorName": "خدمات فنی و مهندسی",
+        "SectorNameEn": "Technical and Engineering Services",
+        "NAICSCode": 5413,
+        "NAICSName": "Architectural, Engineering, and Related Services"
     },
     {
-        "SectorID":1.0,
-        "SectorName":"زراعت و خدمات وابسته"
+        "SectorCode": 1.0,
+        "SectorName": "زراعت و خدمات وابسته",
+        "SectorNameEn": "Agriculture and Related Services",
+        "NAICSCode": 11,
+        "NAICSName": "Agriculture, Forestry, Fishing and Hunting"
     }
 ]
-
-

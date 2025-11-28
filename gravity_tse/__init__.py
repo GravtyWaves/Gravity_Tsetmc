@@ -310,6 +310,11 @@ def get_price_history(stock:str = 'خودرو',
     :return: (pd.DataFrame) A dataframe that contains J-Date as index and Date, Weekday, Open, High, Low, Close, Final, Volume, Value, No, Ticker, Name, Market, Adj Open, Adj High, Adj Low, Adj Close, Adj Final.
     """
 
+    # Delegate to client implementation to continue modular migration
+    return stock_client.get_price_history(stock, start_date=start_date, end_date=end_date,
+                                          ignore_date=ignore_date, adjust_price=adjust_price,
+                                          show_weekday=show_weekday, double_date=double_date)
+
     # basic request and data cleaning function for historical price data of a ticker for a given market 
     def get_price_data(ticker_no, ticker, name, market):
         client = BaseSyncClient()
@@ -336,7 +341,7 @@ def get_price_history(stock:str = 'خودرو',
         start_date = __Check_JDate_Validity__(start_date,key_word="'START'")
         if(start_date==None):
             return
-        end_date = __Check_JDate_Validity__(end_date,key_word="'END'")
+        def get_price_data(ticker_no, ticker, name, market, start_date=None, end_date=None):
         if(end_date==None):
             return
         start = jdatetime.date(year=int(start_date.split('-')[0]), month=int(start_date.split('-')[1]), day=int(start_date.split('-')[2]))
@@ -381,7 +386,7 @@ def get_price_history(stock:str = 'خودرو',
     df_history['Final(+1)'] = df_history['Final'].shift(+1)          
     df_history['Market(+1)'] = df_history['Market'].shift(+1)        
     df_history['temp'] = df_history.apply(lambda x: x['Y-Final'] if((x['Y-Final']!=0)and(x['Y-Final']!=1000)) 
-                                          else (x['Y-Final'] if((x['Market(+1)']==x['Market'])or(pd.isnull(x['Final(+1)']))) 
+                df_temp = get_price_data(ticker_no = row['WebID'], ticker = row['Ticker'], name = row['Name'], market = row['Market'], start_date=start_date, end_date=end_date)
                                           else x['Final(+1)']),axis = 1)
     df_history['Y-Final'] = df_history['temp']
     df_history.drop(columns=['Final(+1)','temp','Market(+1)'],inplace=True)
@@ -421,6 +426,11 @@ def get_price_history(stock:str = 'خودرو',
 
 def Get_Price_History(stock = 'خودرو', start_date = '1400-01-01', end_date='1401-01-01', ignore_date = False, adjust_price = False, show_weekday = False, double_date = False):
     """
+
+    # Delegate to StockClient implementation for a consistent migration
+    return stock_client.get_price_history(stock, start_date=start_date, end_date=end_date,
+                                          ignore_date=ignore_date, adjust_price=adjust_price,
+                                          show_weekday=show_weekday, double_date=double_date)
     دریافت سابقه قیمت یک سهم در روزهای معاملاتی بین تاریخ شروع و پایان
     قابلیت دریافت همه سابقه قیمت بدون توجه به تاریخ شروع و پایان
     قابلیت تعدیل قیمت برای سود نقدی و افزایش سرمایه با احتساب آورده
