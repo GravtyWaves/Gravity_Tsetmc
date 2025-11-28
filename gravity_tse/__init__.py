@@ -36,7 +36,7 @@ from persiantools import characters
 from IPython.display import clear_output
 
 from .core import BaseSyncClient, TSEConnectionError
-from .clients import StockClient
+from .clients import StockClient, MarketClient
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 ################################################################################################################################################################################
@@ -139,6 +139,17 @@ def get_tse_webid(stock:str = 'پترول') -> pd.DataFrame:
 
 # convenience StockClient instance
 stock_client = StockClient()
+market_client = MarketClient()
+
+# package exports
+__all__ = [
+    'get_tse_webid',
+    'get_price_history',
+    'stock_client',
+    'StockClient',
+    'market_client',
+    'MarketClient',
+]
 
 
 def __Get_TSE_WebID__(stock):
